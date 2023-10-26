@@ -16,29 +16,29 @@ library(vtg.chisq)
 # d3 <- Data[((floor(nrow(Data) / 3) * 2) +1) : nrow(Data) ,]
 
 
-load("src/data/d1.rda")
-load("src/data/d2.rda")
-load("src/data/d3.rda")
+# load("src/data/d1.rda")
+# load("src/data/d2.rda")
+# load("src/data/d3.rda")
 
-datasets <- list(d1, d2, d3)
+# datasets <- list(d1, d2, d3)
 
-# Data <- lme4::Arabidopsis
+data <- lme4::Arabidopsis
 
 #### TEST ####
-
-data <- na.omit(rbind(d1, d2, d3))
-col = c("X", "Y", "Z")
+col = c("total.fruits", "nutrient")
+data <- data[,col]
+# data <- na.omit(rbind(d1, d2, d3))
 # Data_s <- Data[,col]
-data2 <- na.omit(data)
+# data2 <- na.omit(data)
 
-Rchisq <- chisq.test(data2)
+Rchisq <- chisq.test(data)
 
-threshold = 5L
+threshold = 1L
 probs=NULL
 
 
 chisq.mock <- function(dataset,col, threshold, probs){
-    client=vtg::MockClient$new(datasets = datasets, pkgname = 'vtg.chisq')
+    client=vtg::MockClient$new(datasets = dataset, pkgname = 'vtg.chisq')
     result=vtg.chisq::dchisq(client = client,
                                  col=col,
                                  threshold=threshold,
@@ -46,11 +46,10 @@ chisq.mock <- function(dataset,col, threshold, probs){
     return(result)
 }
 
-res <- chisq.mock(dataset = datasets,
+res <- chisq.mock(dataset = list(data),
                     col=col,
                     threshold=threshold,
                     probs=probs)
-
 res$statistic == Rchisq$statistic
 res$parameter == Rchisq$parameter
 res$pval == Rchisq$p.value
