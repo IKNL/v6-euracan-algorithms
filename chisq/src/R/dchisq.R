@@ -21,6 +21,7 @@
 #'
 dchisq <- function(client, col, threshold = 5L, probs = NULL,
                        organizations_to_include = NULL){
+
     vtg::log$debug("Initializing...")
     lgr::threshold("debug")
 
