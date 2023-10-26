@@ -20,16 +20,18 @@ RPC_get_N <- function(data, col, threshold = 5L){
                                      unique(x))
 
     data = na.omit(data[,col])
+
     ncol <- length(unique(col))
     if(ncol != length(col)) stop("You have repeated column names...")
     res <- c()
     if(ncol==2){
-        cat("Running chisq.test on 'X' and 'Y'...\n")
+        cat("Running chisq.test on 'X' and 'Y'...")
         x <- as.vector(data[,1])
         y <- as.vector(data[,2])
 
-        if((any(checker.fn(x)) < threshold) || (any(checker.fn(y)) < threshold))
-        {
+        if((any(checker.fn(x)) < threshold) || (any(checker.fn(y)) < threshold)){
+            vtg::log$debug("Disclosure risk, some values are lower than ",
+                           threshold)
             stop(paste0("Disclosure risk, some values are lower than ",
                         threshold))
         }
@@ -43,7 +45,7 @@ RPC_get_N <- function(data, col, threshold = 5L){
         res <- c(length(x), length(y))
         attr(res, "class") <- c("2 by 2")
     }else{
-        cat("Running chisq.test on dataframe... \n")
+        cat("Running chisq.test on dataframe...")
         if(is.data.frame(data)){
             dt <- as.matrix(data)
             check <- lapply(1:ncol(dt), function(col_index) {
