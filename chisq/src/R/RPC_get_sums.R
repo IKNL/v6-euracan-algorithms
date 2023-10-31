@@ -16,11 +16,12 @@ RPC_get_sums <- function(data, col){
         y <- factor(y[OK])
         if((nlevels(x) < 2L) || (nlevels(y) < 2L))
             stop("'x' & 'y' must have at least 2 levels")
-        tab <- stats::table(x, y)
+        tab <- table(x, y)
         names(dimnames(tab)) <- c(dnameX, dnameY)
         n <- sum(tab)
         nr <- as.integer(nrow(tab))
-        nc <- as.integer(ncol(tab))
+        # nc <- as.integer(ncol(tab))
+        nc <- NULL
         sr <- rowSums(tab)
         sc <- colSums(tab)
     }else{

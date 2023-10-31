@@ -98,8 +98,7 @@ dchisq <- function(client, col, threshold = 5L, probs = NULL,
         col = col
     )
 
-    exp.and.var <- vtg.chisq::expectation(node.sums, p,
-                               (is.col <- ifelse(data.class == "col", T, F)))
+    exp.and.var <- vtg.chisq::expectation(node.sums, p, data.class)
 
     E.glob <- exp.and.var$E
 
@@ -109,23 +108,29 @@ dchisq <- function(client, col, threshold = 5L, probs = NULL,
     node.statistic <- client$call(
         "statistic",
         col = col,
-        E = E.glob
+        E = E.glob,
+        data.class = data.class
     )
 
     glob.statistic <- Reduce(`+`, node.statistic)
 
     df.fn <- function(x, y) as.integer((x - 1L) * (y - 1L))
 
-    glob.nc <- Reduce("all", lapply(node.sums, function(x) x$nc))
+    glob.nc <- if(data.class == "DF"){
+        Reduce("all", lapply(node.sums, function(x) x$nc))
+    }else if(data.class == "2 by 2"){
+        exp.and.var$glob.nc
+    }
 
     glob.nr <- Reduce(`+`, lapply(node.sums, function(x) x$nr))
 
-    parameter <- if(data.class %in% c("DF", "2 by 2")){
-        df.fn(glob.nr,( glob.nc <- ifelse(glob.nc, node.sums[[1]]$nc, NULL)))
+    parameter <- if(data.class == "DF"){
+        df.fn(glob.nr, node.sums[[1]]$nc)
+    }else if (data.class == "2 by 2"){
+        df.fn(glob.nr, glob.nc)
     }else{
         N - 1
     }
-
 
     pval <- stats::pchisq(glob.statistic, parameter, lower.tail = F)
 

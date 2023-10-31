@@ -1,24 +1,52 @@
 #' @export
 #'
-RPC_statistic <- function(data, col, E){
+RPC_statistic <- function(data, col, E, data.class){
 
-    data <- na.omit(data[,col])
+    data <- na.omit(data)
+    columns.in.data <- which(colnames(data) %in% col)
     # access correct rows & column...
-    local.E <- E[dimnames(E)[[1]] %in% dimnames(data)[[1]],
-                 dimnames(E)[[2]] %in% dimnames(data)[[2]]]
-    return(sum((abs(data - local.E))^2/local.E))
+    if(data.class == "DF"){
+        # local.E <- E[dimnames(E)[[1]] %in% data$id, columns.in.data]
+        local.E <- E[data$id, columns.in.data]
+        return(sum(
+            abs(
+                data[,columns.in.data] - local.E
+            )^2 / local.E
+        ))
+    }else if(data.class == "2 by 2"){
+        data <- data[,col]
+        local.E <- E[dimnames(E)[[1]] %in% dimnames(data)[[1]],
+                     dimnames(E)[[2]] %in% dimnames(data)[[2]]]
+        return(sum(
+            abs(
+                data - local.E
+            ) ^ 2 / local.E
+        ))
+
+    }else{
+        local.E <- E[dimnames(data[,columns.in.data])[[1]],
+                     columns.in.data]
+        return(sum(
+            abs(
+                data[,columns.in.data] - local.E
+            ) ^ 2 / local.E
+        ))
+    }
 }
 
-data
 
-test1 <- na.omit(d1[,col])
-test2 <- na.omit(d2[,col])
-test3 <- na.omit(d3[,col])
-
-# dimnames of data are not correct -> order data... -> identify which values belong to cluster i
-E.glob[dimnames(E.glob)[[1]] %in% dimnames(test3)[[1]],]
-
-x <- data.frame(sample(c(1:10), 10, replace = T), row.names = NULL)
-x[,2] <- c(1:nrow(x))
-
-x[which(x[,2] == 4),]
+# df1= table(d1[,col]);df2= table(na.omit(d2[,col]));df3= table(d3[,col]);
+# e1 <-  E.glob[dimnames(E.glob)[[1]] %in% dimnames(df1)[[1]],
+#          dimnames(E.glob)[[2]] %in% dimnames(df1)[[2]]]
+# e2 <-  E.glob[dimnames(E.glob)[[1]] %in% dimnames(df2)[[1]],
+#               dimnames(E.glob)[[2]] %in% dimnames(df2)[[2]]]
+# e3 <-  E.glob[dimnames(E.glob)[[1]] %in% dimnames(df3)[[1]],
+#               dimnames(E.glob)[[2]] %in% dimnames(df3)[[2]]]
+#
+# # gives similar value but slightly off...
+# a=sum(abs(df1 - e1-.33)^2/e1);b=sum(abs(df2 - e2-.33)^2/e2);c=sum(abs(df3 - e3-.33)^2/e3);
+# # a= -2 *sum( df1 * log(df1/e1) );b= -2 *sum( df2 * log(df2/e2) );c= -2 *sum( df3 * log(df3/e3) );
+#
+# abs(data - E.glob)^2
+#
+# abs(df1-e1)^2+abs(df2-e2)^2;abs(df3-e3)^2;

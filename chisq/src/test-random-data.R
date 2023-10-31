@@ -4,18 +4,20 @@ Data <- data.frame("X" = sample(6:25, size = 1000, replace = T),
                    "Z" = sample(c(6:19, NA), size= 1000, replace = T))
 
 d1 <- Data[(1:floor(nrow(Data) / 3)), ]
+d1$id <- paste0("node", rep(1, nrow(d1)))
 d2 <- Data[(floor(nrow(Data) / 3)+1: floor(nrow(Data) / 3) * 2),]
+d2$id <- paste0("node", rep(2, nrow(d2)))
 d3 <- Data[((floor(nrow(Data) / 3) * 2) +1) : nrow(Data) ,]
+d3$id <- paste0("node", rep(3, nrow(d3)))
 datasets <- list(d1, d2, d3)
 
 data <- na.omit(rbind(d1, d2, d3))
-col = c("X", "Y", "Z")
+col = c("X","Y")
 
-Rchisq <- chisq.test(data)
+Rchisq <- chisq.test(x = data$X, y=data$Y)
 
 threshold = 1L
 probs=NULL
-
 
 
 chisq.mock <- function(dataset,col, threshold, probs){

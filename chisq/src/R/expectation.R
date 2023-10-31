@@ -1,8 +1,12 @@
 #' @export
 #'
-expectation <- function(nodesums, p, is.col = F){
+expectation <- function(nodesums, p, data.class){
 
-    if(!is.col){
+    if(data.class == "DF"){
+        for(x in seq(length(nodesums))){
+            names(nodesums[[x]]$sr) <-
+                paste0("node", rep(x,length(nodesums[[x]]$sr)))
+        }
         glob.n <- Reduce(`+`, lapply(nodesums, function(x) x$n))
         glob.nr <- Reduce(`+`, lapply(nodesums, function(x) x$nr))
         glob.nc <- Reduce(`+`, lapply(nodesums, function(x) x$nc))
@@ -13,10 +17,29 @@ expectation <- function(nodesums, p, is.col = F){
         E = outer( glob.sr, glob.sc) / glob.n
         v <- function(r, c, n) c * r * (n - r) * (n - c)/n^3
         V <- outer(glob.sr, glob.sc, v, glob.n)
+    } else if(data.class == "2 by 2"){
+        glob.n <- Reduce(`+`, lapply(nodesums, function(x) x$n))
+        temp.sr <- Reduce(`c`, lapply(nodesums, function(x) x$sr))
+        temp.sr <- aggregate(temp.sr, FUN=sum, by=list(names(temp.sr)),
+                             simplify=T)
+        glob.sr <- as.numeric(temp.sr$x);names(glob.sr) <- temp.sr$Group.1
+        glob.sr <- glob.sr[order(as.numeric(names(glob.sr)))]
+        glob.nr <- length(glob.sr)
+        temp.sc <- Reduce(`c`, lapply(nodesums, function(x) x$sc))
+        temp.sc <- aggregate(temp.sc,FUN=sum, by=list(names(temp.sc)),
+                             simplify=T)
+        glob.sc <- as.numeric(temp.sc$x); names(glob.sc) <- temp.sc$Group.1
+        glob.sc <- glob.sc[order(as.numeric(names(glob.sc)))]
+        glob.nc <- length(glob.sc)
+        E = outer( glob.sr, glob.sc) / glob.n
+        v <- function(r, c, n) c * r * (n - r) * (n - c)/n^3
+        V <- outer(glob.sr, glob.sc, v, glob.n)
+
     }else{
         glob.n <- Reduce(`+`, lapply(nodesums, function(x) x$n))
         E <- glob.n * p
         V <- glob.n * p * (1-p)
     }
-    return(list("E" = E , "V" = V))
+    return(list("E" = E , "V" = V, "glob.nc" = ifelse(data.class == "2 by 2",
+                                                      glob.nc, NULL)))
 }
