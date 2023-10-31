@@ -1,6 +1,8 @@
 #' @export
 #'
-RPC_get_N <- function(data, col, threshold = 5L){
+get_n <- function(data, col, threshold = 5L)
+{
+    vtg::log$info("RPC get N...")
     if(!is.null(threshold)){
         if(!is.integer(threshold)){
             stop(paste0(threshold, " is not an Integer, try using: ", threshold

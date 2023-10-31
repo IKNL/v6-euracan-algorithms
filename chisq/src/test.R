@@ -1,56 +1,52 @@
 rm(list = ls(all.names = TRUE))
 
-
-library(vtg)
-library(vtg.chisq)
-
-# Generate some sample data
-# set.seed(123L);
-
-# Data <- data.frame("X" = sample(6:25, size = 1000, replace = T),
-#                    "Y" = sample(c(6:20, NA), size= 1000, replace = T),
-#                    "Z" = sample(c(6:19, NA), size= 1000, replace = T))
-
-# d1 <- Data[(1:floor(nrow(Data) / 3)), ]
-# d2 <- Data[(floor(nrow(Data) / 3)+1: floor(nrow(Data) / 3) * 2),]
-# d3 <- Data[((floor(nrow(Data) / 3) * 2) +1) : nrow(Data) ,]
-
-
 load("src/data/d1.rda")
 load("src/data/d2.rda")
 load("src/data/d3.rda")
 
-datasets <- list(d1, d2, d3)
 
-# Data <- lme4::Arabidopsis
-
-#### TEST ####
-
+#
+#   Build-in Chisq test
+#
 data <- na.omit(rbind(d1, d2, d3))
-col = c("X", "Y", "Z")
-# Data_s <- Data[,col]
-data2 <- na.omit(data)
+col <- c("X", "Y", "Z")
+data <- na.omit(data)
+central_result <- chisq.test(data)
 
-Rchisq <- chisq.test(data2)
 
+#
+#   Federated Chisq test
+#
+datasets <- list(d1, d2, d3)
 threshold = 5L
 probs=NULL
 
+# Configure logginh
 
-chisq.mock <- function(dataset,col, threshold, probs){
-    client=vtg::MockClient$new(datasets = datasets, pkgname = 'vtg.chisq')
-    result=vtg.chisq::dchisq(client = client,
-                                 col=col,
-                                 threshold=threshold,
-                                 probs=probs)
+chisq.mock <- function(dataset, col, threshold, probs){
+
+    client = vtg::MockClient$new(
+        datasets = datasets,
+        pkgname = 'vtg.chisq'
+    )
+
+    log <- lgr::get_logger("vtg/MockClient")
+    log$set_threshold("debug")
+    log <- lgr::get_logger("vtg/Client")
+    log$set_threshold("debug")
+
+
+    result=vtg.chisq::dchisq(client=client, col=col, threshold=threshold,
+                             probs=probs)
     return(result)
 }
 
-res <- chisq.mock(dataset = datasets,
-                    col=col,
-                    threshold=threshold,
-                    probs=probs)
+federated_result <- chisq.mock(dataset=datasets, col=col, threshold=threshold,
+                               probs=probs)
 
-res$statistic == Rchisq$statistic
-res$parameter == Rchisq$parameter
-res$pval == Rchisq$p.value
+#
+#   Compare results
+#
+federated_result$statistic == central_result$statistic
+federated_result$parameter == central_result$parameter
+federated_result$pval == central_result$p.value
