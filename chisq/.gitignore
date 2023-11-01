@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 
 /docs/_build/*
 
@@ -358,9 +357,3 @@ TSWLatexianTemp*
 
 # Ignore plot files
 *.pdf
-=======
-.Rproj.user
-.Rhistory
-.RData
-.Ruserdata
->>>>>>> main

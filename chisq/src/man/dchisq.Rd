@@ -14,7 +14,7 @@ dchisq(
 )
 }
 \arguments{
-\item{client}{vtg::Client instance provided by node (datastation).}
+\item{client}{`vtg::Client` instance provided by node (datastation).}
 
 \item{col}{Can by single column name or N column name. If `2` column names,
 executes Chisq on Contingency table. Warning: Sends frequency distribution.}

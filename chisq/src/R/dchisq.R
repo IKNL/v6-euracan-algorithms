@@ -2,7 +2,7 @@
 #'
 #' This version has built in `threshold` parameter that checks if any counts
 #' are less than tolerance. Default is 5. Can go lower (to 1). Up to data-owner.
-#' @param client vtg::Client instance provided by node (datastation).
+#' @param client `vtg::Client` instance provided by node (datastation).
 #' @param col Can by single column name or N column name. If `2` column names,
 #' executes Chisq on Contingency table. Warning: Sends frequency distribution.
 #' @param threshold Disclosure check. Default is 5, if number of counts in
@@ -22,10 +22,18 @@
 dchisq <- function(client, col, threshold = 5L, probs = NULL, X_y_case = FALSE,
                        organizations_to_include = NULL){
 
-    vtg::log$debug("Initializing...")
-    lgr::threshold("debug")
+     # Create a logger
+    log <- lgr::get_logger_glue("dchisq2")
+    log$set_threshold("debug")
+
+    log$info("Initializing dchisq...")
+    log$debug("col: {col}")
+    log$debug("threshold: {threshold}")
+    log$debug("probs: {probs}")
+    log$debug("organizations_to_include: {organizations_to_include}")
 
     image.name <- "harbor2.vantage6.ai/starter/chisq:latest"
+    log$info("using image '{image.name}'")
 
     client$set.task.image(
         image.name,
@@ -35,7 +43,7 @@ dchisq <- function(client, col, threshold = 5L, probs = NULL, X_y_case = FALSE,
     # Update the client organizations according to those specified
     if (!is.null(organizations_to_include)) {
 
-        vtg::log$info("Sending tasks only to specified organizations")
+        log$info("Sending tasks only to specified organizations")
         organisations_in_collaboration = client$collaboration$organizations
         # Clear the current list of organisations in the collaboration
         # Will remove them for current task, not from actual collaboration
@@ -64,8 +72,7 @@ dchisq <- function(client, col, threshold = 5L, probs = NULL, X_y_case = FALSE,
     }
 
     if (client$use.master.container) {
-        vtg::log$debug(glue::glue("Running `dchisq.test` in master container using
-                                  image '{image.name}'.."))
+        log$debug("Running `dchisq.test` in master container using")
         result <- client$call(
             "dchisq",
             col = col,
@@ -73,32 +80,33 @@ dchisq <- function(client, col, threshold = 5L, probs = NULL, X_y_case = FALSE,
             probs = probs,
             X_y_case = X_y_case
         )
-
         return(result)
     }
 
-    vtg::log$info("RPC get N")
-    node.lens <- client$call(
-        "get_N",
+    log$info("Making subtask to `get_N` and `get_sums` for each node...3")
+    # TODO: combine the two calls into a single one
+    lengths.and.sums <- client$call(
+        "get_n_and_sums",
         col = col,
         threshold = threshold,
         X_y_case = X_y_case
     )
 
-    # node.lens won't run unless all the class is the same...
-    data.class <- attributes(node.lens[[1]])$class
+    # Extract from each element in the list `n`
 
+
+    node.lens <- lapply(lengths.and.sums, function(x) x$n)
+    node.sums <- lapply(lengths.and.sums, function(x) x$sums)
+
+    log$info("Combining results from nodes...")
     total.lengths <- vtg.chisq::sumlocals(node.lens)
 
-    p <- vtg.chisq::assign_probabilities(
-        (N <- ifelse(data.class == "DF", total.lengths$y,
-                     total.lengths$x)), probs)
 
-    vtg::log$info("RPC get sums")
-    node.sums <- client$call(
-        "get_sums",
-        col = col
-    )
+    # node.lens won't run unless all the class is the same...
+    data.class <- attributes(node.lens[[1]])$class
+    p <- vtg.chisq::assign_probabilities(
+        (N <- ifelse(data.class == "DF", total.lengths$y,total.lengths$x)), probs)
+
 
     exp.and.var <- vtg.chisq::expectation(node.sums, p, data.class)
 

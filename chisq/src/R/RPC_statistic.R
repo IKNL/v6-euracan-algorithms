@@ -33,20 +33,3 @@ RPC_statistic <- function(data, col, E, data.class){
         ))
     }
 }
-
-
-# df1= table(d1[,col]);df2= table(na.omit(d2[,col]));df3= table(d3[,col]);
-# e1 <-  E.glob[dimnames(E.glob)[[1]] %in% dimnames(df1)[[1]],
-#          dimnames(E.glob)[[2]] %in% dimnames(df1)[[2]]]
-# e2 <-  E.glob[dimnames(E.glob)[[1]] %in% dimnames(df2)[[1]],
-#               dimnames(E.glob)[[2]] %in% dimnames(df2)[[2]]]
-# e3 <-  E.glob[dimnames(E.glob)[[1]] %in% dimnames(df3)[[1]],
-#               dimnames(E.glob)[[2]] %in% dimnames(df3)[[2]]]
-# #
-# # # gives similar value but slightly off...
-# a=sum(abs(df1 - e1)^2/e1);b=sum(abs(df2 - e2)^2/e2);c=sum(abs(df3 - e3)^2/e3);
-# # a= -2 *sum( df1 * log(df1/e1) );b= -2 *sum( df2 * log(df2/e2) );c= -2 *sum( df3 * log(df3/e3) );
-#
-# abs(data - E.glob)^2
-#
-# abs(df1-e1)^2+abs(df2-e2)^2;abs(df3-e3)^2;

@@ -1,7 +1,7 @@
 #' @export
 #'
 get_n <- function(data, col, threshold = 5L, X_y_case = F){
-
+    vtg::log$info("Calculating `N`")
     if(!is.null(threshold)){
         if(!is.integer(threshold)){
             stop(paste0(threshold, " is not an Integer, try using: ", threshold
