@@ -35,11 +35,19 @@ expectation <- function(nodesums, p, data.class){
         v <- function(r, c, n) c * r * (n - r) * (n - c)/n^3
         V <- outer(glob.sr, glob.sc, v, glob.n)
 
-    }else{
+    }else if(data.class == "col"){
         glob.n <- Reduce(`+`, lapply(nodesums, function(x) x$n))
         E <- glob.n * p
         V <- glob.n * p * (1-p)
+    }else{
+        stop("Cannot handle other data types...")
     }
-    return(list("E" = E , "V" = V, "glob.nc" = ifelse(data.class == "2 by 2",
-                                                      glob.nc, NULL)))
+    ans <- list(
+        E = E,
+        V = V,
+        glob.nc = ifelse(data.class=="2 by 2", glob.nc, NA),
+        glob.nr = ifelse(data.class == "2 by 2", glob.nr, NA)
+
+    )
+    return(ans)
 }

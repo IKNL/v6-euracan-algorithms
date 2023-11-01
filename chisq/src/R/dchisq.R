@@ -122,7 +122,12 @@ dchisq <- function(client, col, threshold = 5L, probs = NULL,
         exp.and.var$glob.nc
     }
 
-    glob.nr <- Reduce(`+`, lapply(node.sums, function(x) x$nr))
+    glob.nr <- if(data.class == "2 by 2"){
+        exp.and.var$glob.nr
+    }else{
+        Reduce(`+`, lapply(node.sums, function(x) x$nr))
+    }
+
 
     parameter <- if(data.class == "DF"){
         df.fn(glob.nr, node.sums[[1]]$nc)

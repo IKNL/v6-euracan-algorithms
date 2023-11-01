@@ -6,17 +6,17 @@ RPC_statistic <- function(data, col, E, data.class){
     columns.in.data <- which(colnames(data) %in% col)
     # access correct rows & column...
     if(data.class == "DF"){
-        # local.E <- E[dimnames(E)[[1]] %in% data$id, columns.in.data]
-        local.E <- E[data$id, columns.in.data]
+        local.E <- E[dimnames(E)[[1]] %in% data$id, columns.in.data]
         return(sum(
             abs(
                 data[,columns.in.data] - local.E
             )^2 / local.E
         ))
     }else if(data.class == "2 by 2"){
-        data <- data[,col]
+        data <- table(data[,columns.in.data])
         local.E <- E[dimnames(E)[[1]] %in% dimnames(data)[[1]],
                      dimnames(E)[[2]] %in% dimnames(data)[[2]]]
+        # local.E <- E[dimnames(data)[[1]], dimnames(data)[[2]]]
         return(sum(
             abs(
                 data - local.E
@@ -24,11 +24,11 @@ RPC_statistic <- function(data, col, E, data.class){
         ))
 
     }else{
-        local.E <- E[dimnames(data[,columns.in.data])[[1]],
-                     columns.in.data]
+        data <- as.vector(data[, columns.in.data])
+        local.E <- E[length(data)]
         return(sum(
             abs(
-                data[,columns.in.data] - local.E
+                data - local.E
             ) ^ 2 / local.E
         ))
     }
@@ -42,9 +42,9 @@ RPC_statistic <- function(data, col, E, data.class){
 #               dimnames(E.glob)[[2]] %in% dimnames(df2)[[2]]]
 # e3 <-  E.glob[dimnames(E.glob)[[1]] %in% dimnames(df3)[[1]],
 #               dimnames(E.glob)[[2]] %in% dimnames(df3)[[2]]]
-#
-# # gives similar value but slightly off...
-# a=sum(abs(df1 - e1-.33)^2/e1);b=sum(abs(df2 - e2-.33)^2/e2);c=sum(abs(df3 - e3-.33)^2/e3);
+# #
+# # # gives similar value but slightly off...
+# a=sum(abs(df1 - e1)^2/e1);b=sum(abs(df2 - e2)^2/e2);c=sum(abs(df3 - e3)^2/e3);
 # # a= -2 *sum( df1 * log(df1/e1) );b= -2 *sum( df2 * log(df2/e2) );c= -2 *sum( df3 * log(df3/e3) );
 #
 # abs(data - E.glob)^2

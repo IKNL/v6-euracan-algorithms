@@ -1,6 +1,7 @@
 #' @export
 #'
 RPC_get_N <- function(data, col, threshold = 5L){
+
     if(!is.null(threshold)){
         if(!is.integer(threshold)){
             stop(paste0(threshold, " is not an Integer, try using: ", threshold
@@ -19,17 +20,17 @@ RPC_get_N <- function(data, col, threshold = 5L){
     checker.fn <- function(x) mapply(FUN=function(i) length(x[x == i]),
                                      unique(x))
 
-    data = na.omit(data[,col])
+    data = na.omit(data)
 
     ncol <- length(unique(col))
     if(ncol != length(col)) stop("You have repeated column names...")
     res <- c()
     if(ncol==2){
         cat("Running chisq.test on 'X' and 'Y'...")
-        x <- as.vector(data[,1])
-        y <- as.vector(data[,2])
+        x <- as.vector(data[,col[1]])
+        y <- as.vector(data[,col[2]])
 
-        if((any(checker.fn(x)) < threshold) || (any(checker.fn(y)) < threshold)){
+        if((any(checker.fn(x)) < threshold)||(any(checker.fn(y)) < threshold)){
             vtg::log$debug("Disclosure risk, some values are lower than ",
                            threshold)
             stop(paste0("Disclosure risk, some values are lower than ",
@@ -39,15 +40,15 @@ RPC_get_N <- function(data, col, threshold = 5L){
         OK <- complete.cases(x,y)
         x <- factor(x[OK])
         y <- factor(y[OK])
-
+        tab <- table(x,y)
         if((nlevels(x) < 2L) || (nlevels(y) < 2L))
             stop("'x' & 'y' must have at least 2 levels")
         res <- c(length(x), length(y))
         attr(res, "class") <- c("2 by 2")
     }else{
         cat("Running chisq.test on dataframe...")
-        if(is.data.frame(data)){
-            dt <- as.matrix(data)
+        if(is.data.frame(data[,col])){
+            dt <- as.matrix(data[,col])
             check <- lapply(1:ncol(dt), function(col_index) {
                 uni.vals <- unique(dt[, col_index])
                 occurrences <- sapply(uni.vals, function(uni_val) {
@@ -64,7 +65,7 @@ RPC_get_N <- function(data, col, threshold = 5L){
             res <- c(nrow(dt), ncol(dt))
             attr(res, "class") <- c("DF")
         }else{
-            dt <- as.vector(data)
+            dt <- as.vector(data[,col])
             if(any(checker.fn(dt)) < threshold){
                 stop(paste0("Disclosure risk, some values are lower than ",
                             threshold))
