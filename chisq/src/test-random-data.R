@@ -13,14 +13,14 @@ d3$id <- paste0("node", rep(3, nrow(d3)))
 datasets <- list(d1, d2, d3)
 
 data <- na.omit(rbind(d1, d2, d3))
-col = c("X","Y")
+col = c("X","Y", "Z")
 
 Rchisq <- chisq.test(data[,col])
 # Rchisq <- chisq.test(x = data$X, y=data$Y)
 
 
 threshold = 1L
-probs=NULL
+probs = NULL
 X_y_case = F
 
 chisq.mock <- function(dataset,col, threshold, probs, X_y_case){

@@ -1,6 +1,6 @@
 #' @export
 #'
-RPC_get_n_and_sums <- function(data, col, threshold = 5L)
+RPC_get_n_and_sums <- function(data, col, threshold = 5L, X_y_case = F)
 {
     n <- vtg.chisq::get_n(data, col, threshold = threshold)
     sums <- vtg.chisq::get_sums(data, col)

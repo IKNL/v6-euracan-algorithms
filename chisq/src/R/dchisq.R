@@ -19,8 +19,8 @@
 #'
 #' @export
 #'
-dchisq <- function(client, col, threshold = 5L, probs = NULL, X_y_case = FALSE,
-                       organizations_to_include = NULL){
+dchisq <- function(client, col, threshold = 5L, probs = NULL,
+                   X_y_case = FALSE, organizations_to_include = NULL){
 
      # Create a logger
     log <- lgr::get_logger_glue("dchisq2")
@@ -83,8 +83,7 @@ dchisq <- function(client, col, threshold = 5L, probs = NULL, X_y_case = FALSE,
         return(result)
     }
 
-    log$info("Making subtask to `get_N` and `get_sums` for each node...3")
-    # TODO: combine the two calls into a single one
+    log$info("Making subtask to `get_N` and `get_sums` for each node...")
     lengths.and.sums <- client$call(
         "get_n_and_sums",
         col = col,
@@ -93,8 +92,6 @@ dchisq <- function(client, col, threshold = 5L, probs = NULL, X_y_case = FALSE,
     )
 
     # Extract from each element in the list `n`
-
-
     node.lens <- lapply(lengths.and.sums, function(x) x$n)
     node.sums <- lapply(lengths.and.sums, function(x) x$sums)
 
@@ -105,7 +102,8 @@ dchisq <- function(client, col, threshold = 5L, probs = NULL, X_y_case = FALSE,
     # node.lens won't run unless all the class is the same...
     data.class <- attributes(node.lens[[1]])$class
     p <- vtg.chisq::assign_probabilities(
-        (N <- ifelse(data.class == "DF", total.lengths$y,total.lengths$x)), probs)
+        (N <- ifelse(data.class == "DF", total.lengths$y,total.lengths$x)),
+        probs)
 
 
     exp.and.var <- vtg.chisq::expectation(node.sums, p, data.class)
