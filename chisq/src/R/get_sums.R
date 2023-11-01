@@ -1,6 +1,6 @@
 #' @export
 #'
-RPC_get_sums <- function(data, col, X_y_case=F){
+get_sums <- function(data, col, X_y_case=F){
     data = na.omit(data)
     ncol <- length(unique(col))
     if(ncol != length(col)) stop("You have repeated column names...")

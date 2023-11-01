@@ -1,6 +1,6 @@
 #' @export
 #'
-RPC_get_N <- function(data, col, threshold = 5L, X_y_case = F){
+get_n <- function(data, col, threshold = 5L, X_y_case = F){
 
     if(!is.null(threshold)){
         if(!is.integer(threshold)){
