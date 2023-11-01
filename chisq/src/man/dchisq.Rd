@@ -9,6 +9,7 @@ dchisq(
   col,
   threshold = 5L,
   probs = NULL,
+  X_y_case = FALSE,
   organizations_to_include = NULL
 )
 }

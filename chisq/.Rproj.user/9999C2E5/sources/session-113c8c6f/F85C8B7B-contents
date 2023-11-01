@@ -19,7 +19,7 @@
 #'
 #' @export
 #'
-dchisq <- function(client, col, threshold = 5L, probs = NULL, X_y_case = FALSE,
+dchisq <- function(client, col, threshold = 5L, probs = NULL,
                        organizations_to_include = NULL){
 
     vtg::log$debug("Initializing...")
@@ -70,8 +70,7 @@ dchisq <- function(client, col, threshold = 5L, probs = NULL, X_y_case = FALSE,
             "dchisq",
             col = col,
             threshold = threshold,
-            probs = probs,
-            X_y_case = X_y_case
+            probs = probs
         )
 
         return(result)
@@ -81,8 +80,7 @@ dchisq <- function(client, col, threshold = 5L, probs = NULL, X_y_case = FALSE,
     node.lens <- client$call(
         "get_N",
         col = col,
-        threshold = threshold,
-        X_y_case = X_y_case
+        threshold = threshold
     )
 
     # node.lens won't run unless all the class is the same...
@@ -106,6 +104,8 @@ dchisq <- function(client, col, threshold = 5L, probs = NULL, X_y_case = FALSE,
 
     V.glob <- exp.and.var$V
 
+    glob.sc <- exp.and.var$glob.sc
+
     vtg::log$info("RPC statistic")
     node.statistic <- client$call(
         "statistic",
@@ -118,23 +118,15 @@ dchisq <- function(client, col, threshold = 5L, probs = NULL, X_y_case = FALSE,
 
     df.fn <- function(x, y) as.integer((x - 1L) * (y - 1L))
 
-    glob.nc <- if(data.class == "DF"){
-        Reduce("all", lapply(node.sums, function(x) x$nc))
-    }else if(data.class == "X_y_case"){
-        exp.and.var$glob.nc
-    }
+    glob.nc <- Reduce("all", lapply(node.sums, function(x) x$nc))
 
-    glob.nr <- if(data.class == "X_y_case"){
-        exp.and.var$glob.nr
-    }else{
-        Reduce(`+`, lapply(node.sums, function(x) x$nr))
-    }
+    glob.nr <- Reduce(`+`, lapply(node.sums, function(x) x$nr))
 
-
-    parameter <- if(data.class == "DF"){
+    parameter <- if(data.class == "DF")){
+        # df.fn(glob.nr,( glob.nc <- ifelse(glob.nc, node.sums[[1]]$nc, NULL)))
         df.fn(glob.nr, node.sums[[1]]$nc)
-    }else if (data.class == "X_y_case"){
-        df.fn(glob.nr, glob.nc)
+    }else if (data.class == "2 by 2"){
+        df.fn(glob.nr, glob.sc)
     }else{
         N - 1
     }
@@ -144,7 +136,7 @@ dchisq <- function(client, col, threshold = 5L, probs = NULL, X_y_case = FALSE,
     names(glob.statistic) <- "X-squared"
     names(parameter) <- "df"
 
-    method <- ifelse(data.class %in% c("DF", "X_y_case"),
+    method <- ifelse(data.class %in% c("DF", "2 by 2"),
                      "Pearson's Chi-squared test",
                      "Chi-squared test for given probabilities")
 

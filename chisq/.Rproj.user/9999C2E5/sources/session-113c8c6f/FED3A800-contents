@@ -1,0 +1,57 @@
+set.seed(123L);
+# random E matrix
+E <- matrix(data = rnorm(9*3, 10, 5), nrow = 9, ncol = 3)
+# assign dimnames according to data
+dimnames(E)[[1]] = sample(c(1:9), size = 9, T)
+dimnames(E)[[2]] = c("X","Y","Z")
+# assign the repeated value issue
+E[1,][[1]] = 10
+E[7,][[1]] = 10
+# generate data
+set.seed(188L)
+dt=data.frame("X" = sample(c(1:8), 9, T), "Y" = sample(c(1:10), 9, T),
+              "Z" = sample(c(1:2), 9,T))
+# In theory its a straightforward extraction and subtraction
+ans <- sum(
+    abs(
+        (dt[,c("X","Y","Z")] - E)^2 / E
+    )
+)
+bit.inside.ans <- abs(dt[,c("X", "Y", "Z")] - E)^2
+# See where it could go wrong, add an extra row and calculate again
+# Add some random new row with id = 21
+E = rbind(E, c(1,1,1))
+dimnames(E)[[1]][10] = "21"
+test <- sum(
+    abs(
+        (dt[,c("X","Y","Z")] - E )^2 / E
+    )
+)
+# Here we already see whats going wrong... Of course it will also divide with
+# larger E...
+(new.bit.inside.ans <- abs(dt[,c("X", "Y", "Z")] - E)^2) == bit.inside.ans
+# We know how to alleviate this...
+(fix <- abs(dt[,c("X", "Y", "Z")] - E[dimnames(E)[[1]] %in% dimnames(dt)[[1]],])^2) == bit.inside.ans
+# Ok so we know how to fix the issue...
+dt1 = dt[1:5,];dt2=dt[6:9,];
+d1ans=sum(abs(dt1[,c("X","Y","Z")] - E[dimnames(E)[[1]] %in% dimnames(dt1)[[1]],]) ^ 2 / E[dimnames(E)[[1]] %in% dimnames(dt1)[[1]], ])
+d2ans=sum(abs(dt2[,c("X","Y","Z")] - E[dimnames(E)[[1]] %in% dimnames(dt2)[[1]],]) ^ 2 / E[dimnames(E)[[1]] %in% dimnames(dt2)[[1]], ])
+d1ans+d2ans == ans # already an issue!
+# so we just subset the data at each node and now we rename the rows so that
+# its not just the partition
+dimnames(dt2)[[1]] = c(1:nrow(dt2))
+d1ansnew=sum(abs(dt1[,c("X","Y","Z")] - E[dimnames(E)[[1]] %in% dimnames(dt1)[[1]],]) ^ 2 / E[dimnames(E)[[1]] %in% dimnames(dt1)[[1]],])
+# already you can see its selecting the rows, this is because its subtracting the row 1:4 rather than the
+# other...
+d2ansnew=sum(abs(dt2[,c("X","Y","Z")] - E[dimnames(E)[[1]] %in% dimnames(dt2)[[1]],]) ^ 2 / E[dimnames(E)[[1]] %in% dimnames(dt2)[[1]],])
+d1ansnew+d2ansnew == ans # again incorrect!
+# solution is to assign each row in E the correct name which I will match the
+# correct row id in the data
+dt1$id <- paste0("node", rep(1, nrow(dt1)));dt2$id <- paste0("node", rep(2, nrow(dt2)));
+# assign as we did rows 1:5 to dt1 and rows 6:9 to dt2
+dimnames(E)[[1]][1:5] = paste0("node", rep(1, 5))
+dimnames(E)[[1]][6:9] = paste0("node", rep(2, 4))
+# fix
+a1=sum(abs(dt1[,c("X","Y","Z")] - E[dimnames(E)[[1]] %in% dt1$id, ]) ^ 2  / E[dimnames(E)[[1]] %in% dt1$id, ])
+a2=sum(abs(dt2[,c("X","Y","Z")] - E[dimnames(E)[[1]] %in% dt2$id, ]) ^ 2  / E[dimnames(E)[[1]] %in% dt2$id, ])
+a1+a2 == ans

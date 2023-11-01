@@ -1,0 +1,14 @@
+#' @export
+#'
+RPC_statistic <- function(data, col, E){
+
+    data <- na.omit(data)
+    columns.in.data <- which(colnames(data) %in% col)
+    # access correct rows & column...
+    local.E <- E[dimnames(E)[[1]] %in% data$id, columns.in.data]
+    return(sum(
+        abs(
+            data[,columns.in.data] - local.E
+        )^2 / local.E
+    ))
+}

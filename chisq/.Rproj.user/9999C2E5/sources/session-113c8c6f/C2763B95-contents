@@ -1,0 +1,136 @@
+set.seed(123L)
+Data <- data.frame("X" = sample(6:25, size = 1000, replace = T),
+                   "Y" = sample(c(6:20, NA), size= 1000, replace = T),
+                   "Z" = sample(c(6:19, NA), size= 1000, replace = T))
+
+d1 <- Data[(1:floor(nrow(Data) / 3)), ]
+d2 <- Data[(floor(nrow(Data) / 3)+1: floor(nrow(Data) / 3) * 2),]
+d3 <- Data[((floor(nrow(Data) / 3) * 2) +1) : nrow(Data) ,]
+datasets <- list(d1, d2, d3)
+
+data <- na.omit(rbind(d1, d2, d3))
+col= c("X", "Y", "Z")
+
+calc.chisq <- function(data, col){
+
+  dt = data[, col]
+  if(ncol(dt) == 2L){
+    x <- data[,1]
+    y <- data[,2]
+
+    x <- as.vector(x)
+    dnameX <- deparse(substitute(x))
+    dnameY <- deparse(substitute(y))
+    xname <- ifelse(length(dnameX) > 1L || nchar(dnameX, "w")>30, "", dnameX)
+    yname <- ifelse(length(dnameY) > 1L || nchar(dnameY, "w")>30, "", dnameY)
+    OK <- complete.cases(x,y)
+    x <- factor(x[OK])
+    y <- factor(y[OK])
+    if((nlevels(x) < 2L) || (nlevels(y) < 2L))
+        stop("'x' & 'y' must have at least 2 levels")
+    dt <- table(x,y)
+    names(dimnames(dt)) <- c(xname, yname)
+    dname <- paste(paste(dnameX, collapse = "\n"), "and",
+                   paste(dnameY, collapse = "\n"))
+  }
+  if(is.matrix(dt)){
+      a <- sum(dt)
+      nr <- as.integer(nrow(dt))
+      nc <- as.integer(ncol(dt))
+      sr <- rowSums(dt)
+      sc <- colSums(dt)
+      E <- outer(sr, sc)/a
+      dimnames(E) <- dimnames(dt)
+      STATISTIC <- sum((abs(dt - E))^2/E)
+      PARAMETER <- (nr - 1L) * (nc - 1L)
+      PVAL <- pchisq(STATISTIC, PARAMETER, lower.tail = FALSE)
+
+  }
+  # dt = as.vector(dt)
+  # dt = as.matrix(dt)
+  # Send to central server
+
+  # here we send length d1, d2, d3 to server
+  p = rep(1/length(dt), length(dt))
+
+  # aggregation of each data station
+  Tot <- sum(dt)
+
+  # v <- function(r, c, n) c * r * (n - r) * (n - c)/n^3
+
+  # sind partial totals to server
+  # E <- outer(row.tot, col.tot)/ Tot
+  E <- Tot * p
+
+  # V <- outer(row.tot, col.tot, v, Tot)
+  V <- Tot * p * (1-p)
+
+  STATISTIC <- sum((dt- E)^2/E)
+  names(E) <- "col"
+
+  dimnames(E) <- dimnames(dt)
+
+  STATISTIC = sum(
+    abs(dt - E) ^2 / E
+  )
+  # sum((dt[1:10] - E[1:10])^2 / E[1:10] ) + sum((dt[11:33] - E[11:33])^2 / E[11:33] )
+
+  PARAMETER <- length(dt) -1
+
+  pval <- pchisq(STATISTIC, PARAMETER, lower.tail = F)
+  stdres = (dt - E)/sqrt(V)
+
+}
+
+
+# Works with 1 col!
+col = "X"
+
+RPC_get_N <- function(data, col) length(data[!is.na(data[,col]), col])
+
+N.locals <- lapply(datasets, RPC_get_N, col)
+
+d.N <- function(N.locals) Reduce(`+`, N.locals)
+
+N =  d.N(N.locals)
+
+d.assign.probs <- function(N) rep(1/N, N)
+
+p <- d.assign.probs(N)
+
+RPC_get_sum <- function(data, col) sum(data[!is.na(data[,col]), col])
+
+sum.locals <- lapply(datasets, RPC_get_sum, col)
+
+d.sums <- function(sum.locals) Reduce(`+`, sum.locals)
+
+Total <- d.sums(sum.locals)
+
+tot.exp <- function(Total, p) Total * p
+
+tot.V <- function(Total, p) Total * p * (1-p)
+
+E <- tot.exp(Total, p)
+
+V <- tot.V(Total, p)
+
+# To get std res I have to (x-E) at each site where x is the data! This is impossible to do
+# unless using encryption... Homo-morphic encryption? We can do this on the node side instead.
+# also with Residuals!
+# These functions are called only on the node and never sent!
+RPC_std_res <- function(data, col, E, lens,V) abs(data[!is.na(data[,col]), col] - E[seq_len(lens)]) / sqrt(V[seq_len(lens)])
+RPC_residuals <- function(data, col, e, lens) abs(data[!is.na(data[,col]), col] - E[seq_len(lens)]) / sqrt(E[seq_len(lens)])
+# because all probabilities are the same initially we don't care about match
+# length E.
+d.statistic <- function(data, col, E, lens) sum( (data[!is.na(data[,col]), col] - E[seq_len(lens)])^2 / E[seq_len(lens)])
+
+tot.d.stat <- lapply(seq_len(length(datasets)), function(x){
+  d.statistic(datasets[[x]], col, E , N.locals[[x]])
+})
+
+
+tot.d.stat <- Reduce(`+`, tot.d.stat)
+
+param <- N - 1
+
+pchisq(tot.d.stat, param, lower.tail = F)

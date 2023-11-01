@@ -1,11 +1,11 @@
 #' @export
 #'
-RPC_get_sums <- function(data, col, X_y_case=F){
+RPC_get_sums <- function(data, col){
     data = na.omit(data)
     ncol <- length(unique(col))
     if(ncol != length(col)) stop("You have repeated column names...")
     res <- c()
-    if(X_y_case){
+    if(ncol==2){
         cat("Running chisq.test on 'X' and 'Y'...")
         x <- as.vector(data[,col[1]])
         y <- as.vector(data[,col[2]])

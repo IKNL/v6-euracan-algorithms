@@ -6,13 +6,14 @@ RPC_statistic <- function(data, col, E, data.class){
     columns.in.data <- which(colnames(data) %in% col)
     # access correct rows & column...
     if(data.class == "DF"){
-        local.E <- E[dimnames(E)[[1]] %in% data$id, columns.in.data]
+        # local.E <- E[dimnames(E)[[1]] %in% data$id, columns.in.data]
+        local.E <- E[data$id, columns.in.data]
         return(sum(
             abs(
                 data[,columns.in.data] - local.E
             )^2 / local.E
         ))
-    }else if(data.class == "X_y_case"){
+    }else if(data.class == "2 by 2"){
         data <- table(data[,columns.in.data])
         local.E <- E[dimnames(E)[[1]] %in% dimnames(data)[[1]],
                      dimnames(E)[[2]] %in% dimnames(data)[[2]]]
@@ -24,11 +25,11 @@ RPC_statistic <- function(data, col, E, data.class){
         ))
 
     }else{
-        data <- as.vector(data[, columns.in.data])
-        local.E <- E[length(data)]
+        local.E <- E[dimnames(data[,columns.in.data])[[1]],
+                     columns.in.data]
         return(sum(
             abs(
-                data - local.E
+                data[,columns.in.data] - local.E
             ) ^ 2 / local.E
         ))
     }

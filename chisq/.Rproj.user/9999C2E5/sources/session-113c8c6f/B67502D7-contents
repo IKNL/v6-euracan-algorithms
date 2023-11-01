@@ -17,7 +17,7 @@ expectation <- function(nodesums, p, data.class){
         E = outer( glob.sr, glob.sc) / glob.n
         v <- function(r, c, n) c * r * (n - r) * (n - c)/n^3
         V <- outer(glob.sr, glob.sc, v, glob.n)
-    } else if(data.class == "X_y_case"){
+    } else if(data.class == "2 by 2"){
         glob.n <- Reduce(`+`, lapply(nodesums, function(x) x$n))
         temp.sr <- Reduce(`c`, lapply(nodesums, function(x) x$sr))
         temp.sr <- aggregate(temp.sr, FUN=sum, by=list(names(temp.sr)),
@@ -26,28 +26,18 @@ expectation <- function(nodesums, p, data.class){
         glob.sr <- glob.sr[order(as.numeric(names(glob.sr)))]
         glob.nr <- length(glob.sr)
         temp.sc <- Reduce(`c`, lapply(nodesums, function(x) x$sc))
-        temp.sc <- aggregate(temp.sc, FUN=sum, by=list(names(temp.sc)),
+        temp.sc <- aggregate(temp.sc,FUN=sum, by=list(names(temp.sc)),
                              simplify=T)
         glob.sc <- as.numeric(temp.sc$x); names(glob.sc) <- temp.sc$Group.1
         glob.sc <- glob.sc[order(as.numeric(names(glob.sc)))]
-        glob.nc <- length(glob.sc)
         E = outer( glob.sr, glob.sc) / glob.n
         v <- function(r, c, n) c * r * (n - r) * (n - c)/n^3
         V <- outer(glob.sr, glob.sc, v, glob.n)
 
-    }else if(data.class == "col"){
+    }else{
         glob.n <- Reduce(`+`, lapply(nodesums, function(x) x$n))
         E <- glob.n * p
         V <- glob.n * p * (1-p)
-    }else{
-        stop("Cannot handle other data types...")
     }
-    ans <- list(
-        E = E,
-        V = V,
-        glob.nc = ifelse(data.class=="X_y_case", glob.nc, NA),
-        glob.nr = ifelse(data.class == "X_y_case", glob.nr, NA)
-
-    )
-    return(ans)
+    return(list("E" = E , "V" = V))
 }
