@@ -7,7 +7,7 @@ sumlocals <- function(nodes){
     }
     x <- Reduce(`+`, sapply(nodes, function(x) x[1]))
     y <- ifelse(check == "DF",
-                Reduce("all", sapply(nodes, function(x) x[2])),
+                length(unique(sapply(nodes, function(x) x[2]))) == 1,
                 Reduce(`+`, sapply(nodes, function(x) x[2])))
     sumlocals <- if(check == "DF"){
         list("x" = x, "y" = nodes[[1]][2][y])
