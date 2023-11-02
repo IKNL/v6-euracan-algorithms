@@ -1,22 +1,46 @@
+#' Totalling and computing the expectation
 #' @export
 #'
-expectation <- function(nodesums, p, is.col = F){
+expectation <- function(local_totals, total_lengths, probabilities, is_col) {
 
-    if(!is.col){
-        glob.n <- Reduce(`+`, lapply(nodesums, function(x) x$n))
-        glob.nr <- Reduce(`+`, lapply(nodesums, function(x) x$nr))
-        glob.nc <- Reduce(`+`, lapply(nodesums, function(x) x$nc))
-        glob.sr <- Reduce(`c`, lapply(nodesums, function(x) x$sr))
-        glob.sc <- Reduce(`+`, lapply(nodesums, function(x) x$sc))
+  if (is_col) {
 
+    # Global sum of all elements
+    global_sum <- Reduce(`+`, lapply(local_totals, function(x) x$n))
 
-        E = outer( glob.sr, glob.sc) / glob.n
-        v <- function(r, c, n) c * r * (n - r) * (n - c)/n^3
-        V <- outer(glob.sr, glob.sc, v, glob.n)
-    }else{
-        glob.n <- Reduce(`+`, lapply(nodesums, function(x) x$n))
-        E <- glob.n * p
-        V <- glob.n * p * (1-p)
+    # If not provided, compute the probabilities.
+    if (is.null(probabilities)) {
+      probabilities <- rep(1, total_lengths$x) / total_lengths$x
     }
-    return(list("E" = E , "V" = V))
+
+    # Compute the expected values and the variance
+    expected_values <- global_sum * probabilities
+    variance <- global_sum * probabilities * (1 - probabilities)
+
+  } else {
+
+    # Global sum of all elements
+    global_sum <- Reduce(`+`, lapply(local_totals, function(x) x$n))
+
+    # Global row totals
+    row_totals <- Reduce(`c`, lapply(local_totals, function(x) x$sr))
+
+    # Global column totals
+    column_totals <- Reduce(`+`, lapply(local_totals, function(x) x$sc))
+
+    # Based on the totaling, compute the expected value per element in the
+    # global dataset.
+    expected_values <- outer(row_totals, column_totals) / global_sum
+
+    # Special cross product for variance using the `compute_variance` function
+    # for each element.
+    compute_variance <- function(r, c, n) {
+      c * r * (n - r) * (n - c) / n^3
+    }
+    variance <- outer(row_totals, column_totals, compute_variance, global_sum)
+
+  }
+
+  return(list("E" = expected_values, "V" = variance))
+
 }

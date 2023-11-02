@@ -3,6 +3,7 @@
 get_n <- function(data, col, threshold = 5L)
 {
     vtg::log$info("RPC get N...")
+
     if(!is.null(threshold)){
         if(!is.integer(threshold)){
             stop(paste0(threshold, " is not an Integer, try using: ", threshold
@@ -25,9 +26,11 @@ get_n <- function(data, col, threshold = 5L)
 
     ncol <- length(unique(col))
     if(ncol != length(col)) stop("You have repeated column names...")
+    
     res <- c()
     if(ncol==2){
         cat("Running chisq.test on 'X' and 'Y'...")
+        
         x <- as.vector(data[,1])
         y <- as.vector(data[,2])
 
@@ -50,7 +53,9 @@ get_n <- function(data, col, threshold = 5L)
         cat("Running chisq.test on dataframe...")
         if(is.data.frame(data)){
             dt <- as.matrix(data)
-            check <- lapply(1:ncol(dt), function(col_index) {
+            
+            check <- lapply(1:ncol(dt), function(col_index) 
+            {
                 uni.vals <- unique(dt[, col_index])
                 occurrences <- sapply(uni.vals, function(uni_val) {
                     sum(dt[, col_index] == uni_val)
@@ -59,12 +64,15 @@ get_n <- function(data, col, threshold = 5L)
             })
 
             disc.check <- Reduce("all", lapply(check, function(x) any(x$count < threshold)))
+
             if(disc.check){
                 stop(paste0("Disclosure risk, some cells are lower than ",
                             threshold))
             }
+
             res <- c(nrow(dt), ncol(dt))
             attr(res, "class") <- c("DF")
+        
         }else{
             dt <- as.vector(data)
             if(any(checker.fn(dt)) < threshold){

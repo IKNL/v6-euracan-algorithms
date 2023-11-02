@@ -1,4 +1,5 @@
 rm(list = ls(all.names = TRUE))
+devtools::load_all("./src")
 
 load("src/data/d1.rda")
 load("src/data/d2.rda")
