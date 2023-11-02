@@ -21,6 +21,8 @@
 #' @author Frank Martin
 #'
 #' @TODO add some additional logging
+#' @TODO remove 2-by-2 case, as its not working??
+#' @TODO clean `get_n` and `get_sums`
 #' @TODO validate the parameter descriptions
 #' @TODO RPC_compute_chi_squared needs only the part of E relevant to the node
 #' @TODO incorporate Hasan's changes from the branch
@@ -109,9 +111,12 @@ dchisq <- function(client, col, threshold = 5L, probabilities = NULL,
 
   # Now that the global expectation is computed, we can compute the local
   # chi-squared statistic.
+  # TODO: Send back only he relevant part of E, now we send all expected values
+  #       to each node while it only needs the expected values for its own
+  #       data.
   vtg::log$info("Making subtask to `compute_chi_squared` for each node.")
   node_chi_sq_statistic <- client$call("compute_chi_squared", col = col,
-                                       E = globals$E)
+                                       expected_values = globals$E)
   log$info("Results from `compute_chi_squared` received.")
 
   # The local chi-squared statistic is computed, now we can compute the global
@@ -131,6 +136,9 @@ dchisq <- function(client, col, threshold = 5L, probabilities = NULL,
   }
 
   # Use the global chi-squared value to compute to calculate the p-value
+  vtg::log$info("DF", degrees_of_freedom)
+  vtg::log$info(globals$chi_squared)
+
   pval <- stats::pchisq(globals$chi_squared, degrees_of_freedom,
                         lower.tail = FALSE)
 
