@@ -4,46 +4,41 @@ devtools::load_all("./src")
 load("src/data/d1.rda")
 load("src/data/d2.rda")
 load("src/data/d3.rda")
-
+datasets <- list(d1, d2, d3)
+organizations_to_include <- c(1)
 
 #
 #   Build-in Chisq test
 #
-data <- na.omit(rbind(d1, d2, d3))
+# subset datasets bases on organizations_to_include
+data_central <- datasets[organizations_to_include]
+
+data <- na.omit(do.call(rbind, data_central))
+# data <- na.omit(rbind(d1, d2, d3)) # <- `na.omit` is build in the FL ChiSq test
 col <- c("X", "Y", "Z")
-data <- na.omit(data)
 central_result <- chisq.test(data)
 
 
 #
 #   Federated Chisq test
 #
-datasets <- list(d1, d2, d3)
 threshold = 5L
 probs=NULL
 
-# Configure logginh
+client = vtg::MockClient$new(
+    datasets = datasets,
+    pkgname = 'vtg.chisq'
+)
 
-chisq.mock <- function(dataset, col, threshold, probs){
+log <- lgr::get_logger("vtg/MockClient")$set_threshold("debug")
+log <- lgr::get_logger("vtg/Client")$set_threshold("debug")
 
-    client = vtg::MockClient$new(
-        datasets = datasets,
-        pkgname = 'vtg.chisq'
-    )
-
-    log <- lgr::get_logger("vtg/MockClient")
-    log$set_threshold("debug")
-    log <- lgr::get_logger("vtg/Client")
-    log$set_threshold("debug")
-
-
-    result=vtg.chisq::dchisq(client=client, col=col, threshold=threshold,
-                             probs=probs)
-    return(result)
-}
-
-federated_result <- chisq.mock(dataset=datasets, col=col, threshold=threshold,
-                               probs=probs)
+federated_result <- vtg.chisq::dchisq(
+  client = client, col = col,
+  threshold = threshold,
+  probabilities = probs,
+  organizations_to_include = organizations_to_include
+)
 
 #
 #   Compare results

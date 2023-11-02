@@ -25,9 +25,6 @@
 #' @TODO RPC_compute_chi_squared needs only the part of E relevant to the node
 #' @TODO incorporate Hasan's changes from the branch
 #' @TODO add Anja's preprocessing
-#' @TODO move the organization selection to the vtg package, i think it is
-#'      already there. Just check that it is the same, it looks like something
-#'      is changed...
 #' @TODO format all code to linter standards
 #' @TODO setup build pipeline
 #' @TODO add test cases
@@ -50,42 +47,8 @@ dchisq <- function(client, col, threshold = 5L, probabilities = NULL,
 
   client$set.task.image(image.name, task.name = "chisq")
 
-  # Update the client organizations according to those specified
-  if (!is.null(organizations_to_include)) {
-
-    log$info("Sending tasks only to specified organizations")
-    organizations_in_collaboration = client$collaboration$organizations
-    # Clear the current list of organizations in the collaboration
-    # Will remove them for current task, not from actual collaboration
-    client$collaboration$organizations <- list()
-
-    # Reshape list when the organizations_to_include is not already a list
-    # Relevant when e.g., Python is used as client
-    if (!is.list(organizations_to_include)) {
-      organizations_to_use <- toString(organizations_to_include)
-
-      # Remove leading and trailing spaces as in python list
-      organizations_to_use <-
-        gsub(" ", "", organizations_to_use, fixed = TRUE)
-
-      # Convert to list assuming it is comma separated
-      organizations_to_use <-
-        as.list(strsplit(organizations_to_use, ",")[[1]])
-    }
-
-    # Loop through the organization ids in the collaboration
-    for (organization in organizations_in_collaboration) {
-      # Include the organizations only when desired
-      if (organization$id %in% organizations_to_use) {
-        client$collaboration$organizations[[
-          length(client$collaboration$organizations) + 1
-        ]] <- organization
-      }
-    }
-  }
-
   #
-  # Master container guard
+  # Central part guard
   # this will call itself without the `use.master.container` option
   #
   if (client$use.master.container) {
@@ -94,6 +57,12 @@ dchisq <- function(client, col, threshold = 5L, probabilities = NULL,
                           probabilities = probabilities)
     return(result)
   }
+
+  # We set the organizations to include for the partial tasks, we do this after
+  # the central part guard, so that it is clear this is about the partial tasks
+  # as the central part should only be executed in one node (this is because
+  # of the `use.master.container` option)
+  client$setOrganizations(organizations_to_include)
 
   #
   # Orchestration and Aggregation
