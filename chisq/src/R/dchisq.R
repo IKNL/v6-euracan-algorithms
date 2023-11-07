@@ -5,9 +5,6 @@
 #' @param client `vtg::Client` instance provided by node (data station).
 #' @param col Can by single column name or N column name. If `2` column names,
 #' executes Chisq on Contingency table. Warning: Sends frequency distribution.
-#' @param threshold Disclosure check. Default is 5, if number of counts in
-#' any cell is less than `threshold` the function stops and returns an error
-#' message.
 #' @param probabilities These are the probabilities needed. Default is `NULL`
 #' however the data-owner/researcher can supply their own. The length of which
 #' has to correspond to the "total" length of all combined dataset for given
@@ -31,7 +28,7 @@
 #' @TODO setup build pipeline
 #' @TODO add test cases
 #'
-dchisq <- function(client, col, threshold = 5L, probabilities = NULL,
+dchisq <- function(client, col, probabilities = NULL,
                    organizations_to_include = NULL) {
 
   # Create a logger
@@ -40,7 +37,6 @@ dchisq <- function(client, col, threshold = 5L, probabilities = NULL,
 
   log$info("Initializing dchisq...")
   log$debug("col: {col}")
-  log$debug("threshold: {threshold}")
   log$debug("probabilities: {probabilities}")
   log$debug("organizations_to_include: {organizations_to_include}")
 
@@ -55,7 +51,7 @@ dchisq <- function(client, col, threshold = 5L, probabilities = NULL,
   #
   if (client$use.master.container) {
     log$info("Running `dchisq.test` central container.")
-    result <- client$call("dchisq", col = col, threshold = threshold,
+    result <- client$call("dchisq", col = col,
                           probabilities = probabilities)
     return(result)
   }
@@ -70,25 +66,28 @@ dchisq <- function(client, col, threshold = 5L, probabilities = NULL,
   # Orchestration and Aggregation
   #
   log$info("Making subtask to `get_n_and_sums` for each node.")
-  lengths_and_sums <- client$call("get_n_and_sums", col = col,
-                                  threshold = threshold)
-  log$info("Results from `get_n_and_sums` received.")
+  dimensions_and_totals <- client$call("dimensions_and_totals", col = col)
+  log$info("Results from `dimensions_and_totals` received.")
 
-  # Depending on the number of `cols` the contents of `node_lens` will be
-  # different.
+  # Depending on the number of `cols` the contents of `partial_dimensions`
+  # will be different.
   # (1) In the case of a vector this contains the number of elements in that
   #     vector per site.
   # (2) In the case of 2 columns, this contains the number of elements in
   #     each column per site.
   # (3) In the case of a data.frame, this contains the number of elements in
   #     and the number of columns per site.
-  node_lens <- lapply(lengths_and_sums, function(x) x$n)
-  total_lengths <- vtg.chisq::compute_global_dimensions(node_lens)
+#   partial_dimensions <- lapply(
+#     dimensions_and_totals,
+#     function(x) c(x$number_of_rows, x$number_of_columns)
+#   )
+
+  global_dimensions <- vtg.chisq::global_dimensions(dimensions_and_totals)
 
   # In the case of a single vector we need to do some other things than in
   # the case of a data.frame or x-by-y.
-  data_class <- attributes(node_lens[[1]])$class
-  is_col <- ifelse(data_class == "col", TRUE, FALSE)
+  data_class <- attributes(dimensions_and_totals[[1]])$class
+  is_col <- ifelse(data_class == "chi.vector", TRUE, FALSE)
 
   # In case `probabilities` is provided and we are dealing with DF or 2-by-2,
   # we need warn the user that it is not used
@@ -96,18 +95,16 @@ dchisq <- function(client, col, threshold = 5L, probabilities = NULL,
     log$warn("The `probabilities` argument is ignored when using DF mode.")
   }
 
-  # Depending on the number of `cols` the contents of `node_sums` will be
+  # Depending on the number of `cols` the contents of `partial_totals` will be
   # different.
   # (1) In the case of a vector this contains the sum of elements in that
   #     vector per site.
   # (2) In the case of 2 columns .... TODO
   # (3) In the case of a data.frame, this contains the totals of each row,
   #     column and the total number of elements per site.
-  node_sums <- lapply(lengths_and_sums, function(x) x$sums)
-
   # Compute the global expectation and variance
-  globals <- vtg.chisq::expectation(node_sums, total_lengths, probabilities,
-                                    is_col)
+  globals <- vtg.chisq::expectation(dimensions_and_totals, global_dimensions,
+                                    probabilities, is_col)
 
   # Now that the global expectation is computed, we can compute the local
   # chi-squared statistic.
@@ -124,13 +121,14 @@ dchisq <- function(client, col, threshold = 5L, probabilities = NULL,
   globals$chi_squared <- Reduce("+", node_chi_sq_statistic)
 
   # The number of observations in the global dataset
-  globals$n_rows <- Reduce("+", lapply(node_sums, function(x) x$nr))
+  globals$n_rows <- Reduce("+", lapply(dimensions_and_totals,
+                                       function(x) x$number_of_rows))
 
   # The expectancy matrix has the same dimensions as the global dataset, so
   # we can use it to compute the degrees of freedom.
   globals$n_cols <- ncol(globals$E)
   if (is_col) {
-    degrees_of_freedom <- total_lengths$x - 1
+    degrees_of_freedom <- global_dimensions$number_of_rows - 1
   } else {
     degrees_of_freedom <- (globals$n_rows - 1) * (globals$n_cols - 1)
   }

@@ -1,16 +1,18 @@
 #' Totalling and computing the expectation
 #' @export
 #'
-expectation <- function(local_totals, total_lengths, probabilities, is_col) {
+expectation <- function(partial_totals, global_dimensions, probabilities,
+                        is_col) {
 
   if (is_col) {
 
     # Global sum of all elements
-    global_sum <- Reduce(`+`, lapply(local_totals, function(x) x$n))
+    global_sum <- Reduce(`+`, lapply(partial_totals, function(x) x$sum))
 
     # If not provided, compute the probabilities.
     if (is.null(probabilities)) {
-      probabilities <- rep(1, total_lengths$x) / total_lengths$x
+      n <- global_dimensions$number_of_rows
+      probabilities <- rep(1, n) / n
     }
 
     # Compute the expected values and the variance
@@ -20,13 +22,14 @@ expectation <- function(local_totals, total_lengths, probabilities, is_col) {
   } else {
 
     # Global sum of all elements
-    global_sum <- Reduce(`+`, lapply(local_totals, function(x) x$n))
+    global_sum <- Reduce(`+`, lapply(partial_totals, function(x) x$sum))
 
     # Global row totals
-    row_totals <- Reduce(`c`, lapply(local_totals, function(x) x$sr))
+    row_totals <- Reduce(`c`, lapply(partial_totals, function(x) x$sum_of_rows))
 
     # Global column totals
-    column_totals <- Reduce(`+`, lapply(local_totals, function(x) x$sc))
+    column_totals <- Reduce(`+`, lapply(partial_totals,
+                                        function(x) x$sum_of_columns))
 
     # Based on the totaling, compute the expected value per element in the
     # global dataset.
