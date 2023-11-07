@@ -18,8 +18,6 @@
 #' @author Frank Martin
 #'
 #' @TODO add some additional logging
-#' @TODO remove 2-by-2 case, as its not working??
-#' @TODO clean `get_n` and `get_sums`
 #' @TODO validate the parameter descriptions
 #' @TODO RPC_compute_chi_squared needs only the part of E relevant to the node
 #' @TODO incorporate Hasan's changes from the branch
