@@ -75,11 +75,6 @@ dchisq <- function(client, col, probabilities = NULL,
   #     each column per site.
   # (3) In the case of a data.frame, this contains the number of elements in
   #     and the number of columns per site.
-#   partial_dimensions <- lapply(
-#     dimensions_and_totals,
-#     function(x) c(x$number_of_rows, x$number_of_columns)
-#   )
-
   global_dimensions <- vtg.chisq::global_dimensions(dimensions_and_totals)
 
   # In the case of a single vector we need to do some other things than in
@@ -140,8 +135,9 @@ dchisq <- function(client, col, probabilities = NULL,
 
   # Some beatification of the output, so that it is similar to the output of
   # `chisq.test`.
-  names(globals$chi_squared) <- "Chi squared"
+  names(globals$chi_squared) <- "X-squared"
   names(degrees_of_freedom) <- "df"
+  names(pval) <- "p-value"
 
   if (is_col) {
     method <- "Chi-squared test for given probabilities"
