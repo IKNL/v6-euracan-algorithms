@@ -19,8 +19,7 @@
 #'
 #' @TODO add some additional logging
 #' @TODO validate the parameter descriptions
-#' @TODO RPC_compute_chi_squared needs only the part of E relevant to the node
-#' @TODO incorporate Hasan's changes from the branch
+#' @TODO check Hasan's changes from the branch
 #' @TODO add Anja's preprocessing
 #' @TODO format all code to linter standards
 #' @TODO setup build pipeline
@@ -113,12 +112,42 @@ dchisq <- function(client, col, probabilities = NULL,
 
   # Now that the global expectation is computed, we can compute the local
   # chi-squared statistic.
-  # TODO: Send back only he relevant part of E, now we send all expected values
-  #       to each node while it only needs the expected values for its own
-  #       data.
+  # Send back only he relevant part of E, now we send all expected values
+  # to each node while it only needs the expected values for its own
+  # data.
   vtg::log$info("Making subtask to `compute_chi_squared` for each node.")
-  node_chi_sq_statistic <- client$call("compute_chi_squared", col = col,
-                                       expected_values = globals$E)
+
+  if(!length(organizations_to_include) == length(dimensions_and_totals)){
+    stop("organizations_to_include and dimensions_and_totals must be of
+         same length.. This should not be possible")
+  }
+
+  # The computation of the X-squared statistic at each nodes only requires
+  # the expected values for the data at that node. Therefore we send only
+  # the relevant part of the global E to each node.
+  # FIXME: This is very slow as each result is awaited before the next task is
+  # started. This needs to be fixed in the vtg client.
+  idx <- 1
+  node_chi_sq_statistic <- list()
+  for (i in seq_along(organizations_to_include)) {
+
+    organization_id <- organizations_to_include[[i]]
+    client$setOrganizations(c(organization_id))
+    dims <- dimensions_and_totals[[i]]
+
+    if (is_col) {
+      e_subset <- globals$E[idx:(idx + dims$number_of_rows - 1)]
+    } else {
+      e_subset <- globals$E[idx:(idx + dims$number_of_rows - 1), ]
+    }
+    idx <- idx + dims$number_of_rows
+
+    node_chi_sq_statistic <- append(
+      node_chi_sq_statistic,
+      client$call("compute_chi_squared", col = col,
+                  expected_values = e_subset)
+    )
+  }
   log$info("Results from `compute_chi_squared` received.")
 
   # The local chi-squared statistic is computed, now we can compute the global

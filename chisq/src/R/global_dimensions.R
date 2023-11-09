@@ -6,7 +6,6 @@ global_dimensions <- function(partials) {
     partials,
     function(x) c(x$number_of_rows, x$number_of_columns)
   )
-  # print("partials_dimensions: ", partials_dimensions[[1][[1]]])
   # Confirm that all the nodes have executed the same type of Chi-Square
   # test. This can either be `2 by 2`, a `DF`` or a `col`.
 
