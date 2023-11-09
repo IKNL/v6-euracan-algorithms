@@ -17,11 +17,7 @@
 #' @author Matteo Cellamare
 #' @author Frank Martin
 #'
-#' @TODO add some additional logging
-#' @TODO validate the parameter descriptions
-#' @TODO check Hasan's changes from the branch
 #' @TODO add Anja's preprocessing
-#' @TODO format all code to linter standards
 #' @TODO setup build pipeline
 #' @TODO add test cases
 #'

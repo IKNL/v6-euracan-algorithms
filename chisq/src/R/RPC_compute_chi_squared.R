@@ -1,6 +1,6 @@
 #' Compute the local chi-squared statistic
 #'
-#' @param data A data.frame supplied by the node instnace.
+#' @param data A data.frame supplied by the node instance.
 #' @param columns A list of column names to be used for the computation of the
 #' totals.
 #' @param expected_values A vector of expected values.
