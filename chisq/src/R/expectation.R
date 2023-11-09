@@ -1,5 +1,23 @@
-#' Totalling and computing the expectation
-#' @export
+#' Computing the expected values and variance
+#'
+#' @param partial_totals A list of partial totals from each node, each element
+#' of the list should be a list with the following elements:
+#' \itemize{
+#'  \item \code{sum}: The sum of all elements in the dataset.
+#' \item \code{sum_of_rows}: The sum of all rows in the dataset.
+#' \item \code{sum_of_columns}: The sum of all columns in the dataset.
+#' }
+#' @param global_dimensions A list with the following elements:
+#' \itemize{
+#' \item \code{number_of_rows}: The number of rows in the global dataset.
+#' \item \code{number_of_columns}: The number of columns in the global dataset.
+#' }
+#' @param probabilities A vector of probabilities, one for each row in the
+#' global dataset.
+#' @param is_col A boolean indicating whether the computation is for a column
+#' or not.
+#'
+#' @return A list containing the expected values and the variance.
 #'
 expectation <- function(partial_totals, global_dimensions, probabilities,
                         is_col) {

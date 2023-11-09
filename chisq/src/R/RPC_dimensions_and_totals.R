@@ -1,15 +1,16 @@
 
-#' Compute totals from data
+#' Compute totals from local data.frame
 #'
 #' @description
 #' This function computes the totals from the data. This can either be a
 #' data.frame or a vector.
 #'
-#' @param data A data.frame
+#' @param data A data.frame supplied by the node instance
 #' @param columns A list of column names to be used for the computation of the
 #'  totals.
 #'
 #' @return A list containing the totals.
+#'
 RPC_dimensions_and_totals <- function(data, columns) {
 
   # Number of observations in the dataset before removing NA's
@@ -26,7 +27,6 @@ RPC_dimensions_and_totals <- function(data, columns) {
     return(list("error" = "Disclosure risk"))
   }
 
-  # Compute totals
   if (is.data.frame(data_filtered)) {
 
     vtg::log$info("Running chisq.test on dataframe...")

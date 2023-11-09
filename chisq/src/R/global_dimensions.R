@@ -1,5 +1,9 @@
-#' @export
-#' @TODO docs
+#' Global dimensions of the virtual dataset
+#'
+#' @param partials A list of partial dimensions, one for each node.
+#'
+#' @return A list containing the global dimensions.
+#'
 global_dimensions <- function(partials) {
 
   partials_dimensions <- lapply(
