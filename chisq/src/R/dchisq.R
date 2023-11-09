@@ -67,6 +67,18 @@ dchisq <- function(client, col, probabilities = NULL,
   dimensions_and_totals <- client$call("dimensions_and_totals", col = col)
   log$info("Results from `dimensions_and_totals` received.")
 
+  # Validate that all nodes reported their dimensions and totals
+  error <- FALSE
+  for (i in seq_along(dimensions_and_totals) ) {
+    if (!is.null(dimensions_and_totals[[i]]$error)) {
+      log$warn("Node {i} reported an error: {dimensions_and_totals[[i]]$error}")
+      error <- TRUE
+    }
+  }
+  if (error) {
+    return(list(error = "One or more nodes reported an error."))
+  }
+
   # Depending on the number of `cols` the contents of `partial_dimensions`
   # will be different.
   # (1) In the case of a vector this contains the number of elements in that

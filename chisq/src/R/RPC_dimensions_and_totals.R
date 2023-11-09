@@ -22,8 +22,8 @@ RPC_dimensions_and_totals <- function(data, col) {
 
   # Disclosure risk checks
   if (!check_disclosure_risk(data)) {
-    vtg::log$critical("Disclosure risks found, aborting...")
-    stop("Disclosure risks found, aborting...")
+    cat("Disclosure risks, aborting...")
+    return(list("error" = "Disclosure risk"))
   }
 
   # Compute totals
