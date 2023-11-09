@@ -6,15 +6,15 @@
 #' data.frame or a vector.
 #'
 #' @param data A data.frame
-#' @param col A list of column names to be used for the computation of the
+#' @param columns A list of column names to be used for the computation of the
 #'  totals.
 #'
 #' @return A list containing the totals.
-RPC_dimensions_and_totals <- function(data, col) {
+RPC_dimensions_and_totals <- function(data, columns) {
 
   # Number of observations in the dataset before removing NA's
   n_raw <- nrow(data)
-  data_filtered <- na.omit(data[, col])
+  data_filtered <- na.omit(data[, columns])
   # Number of observations in the dataset after removing NA's
   n <- nrow(data_filtered)
   vtg::log$info("Removed ", n_raw - n, " rows from the dataset. As they
@@ -80,8 +80,8 @@ check_disclosure_risk <- function(data) {
 
     # Check that the number of occurrences of each unique element for each
     # column is greater than the threshold
-    for (col in colnames(data)) {
-      if (!check_disclosure_risk(data[, col])) {
+    for (column in colnames(data)) {
+      if (!check_disclosure_risk(data[, column])) {
         return(FALSE)
       }
     }
