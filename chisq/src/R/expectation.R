@@ -44,6 +44,6 @@ expectation <- function(partial_totals, global_dimensions, probabilities,
 
   }
 
-  return(list("E" = expected_values, "V" = variance))
+  return(list("expected" = expected_values, "variance" = variance))
 
 }

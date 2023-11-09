@@ -29,16 +29,15 @@ dchisq <- function(client, columns, probabilities = NULL,
                    organizations_to_include = NULL) {
 
   # Create a logger
-  log <- lgr::get_logger_glue("dchisq2")
-  log$set_threshold("debug")
+  vtg::log$set_threshold("debug")
 
-  log$info("Initializing dchisq...")
-  log$debug("columns: {columns}")
-  log$debug("probabilities: {probabilities}")
-  log$debug("organizations_to_include: {organizations_to_include}")
+  vtg::log$info("Initializing dchisq...")
+  vtg::log$debug("columns: {columns}")
+  vtg::log$debug("probabilities: {probabilities}")
+  vtg::log$debug("organizations_to_include: {organizations_to_include}")
 
   image.name <- "harbor2.vantage6.ai/starter/chisq:latest"
-  log$info("using image '{image.name}'")
+  vtg::log$info("using image '{image.name}'")
 
   client$set.task.image(image.name, task.name = "chisq")
 
@@ -47,7 +46,7 @@ dchisq <- function(client, columns, probabilities = NULL,
   # this will call itself without the `use.master.container` option
   #
   if (client$use.master.container) {
-    log$info("Running `dchisq.test` central container.")
+    vtg::log$info("Running `dchisq.test` central container.")
     result <- client$call("dchisq", columns = columns,
                           probabilities = probabilities)
     return(result)
@@ -62,9 +61,10 @@ dchisq <- function(client, columns, probabilities = NULL,
   #
   # Orchestration and Aggregation
   #
-  log$info("Making subtask to `get_n_and_sums` for each node.")
-  dimensions_and_totals <- client$call("dimensions_and_totals", columns = columns)
-  log$info("Results from `dimensions_and_totals` received.")
+  vtg::log$info("Making subtask to `dimensions_and_totals` for each node.")
+  dimensions_and_totals <- client$call("dimensions_and_totals",
+                                       columns = columns)
+  vtg::log$info("Results from `dimensions_and_totals` received.")
 
   # Validate that all nodes reported their dimensions and totals
   error <- FALSE
@@ -78,44 +78,22 @@ dchisq <- function(client, columns, probabilities = NULL,
     return(list(error = "One or more nodes reported an error."))
   }
 
-  # Depending on the number of `cols` the contents of `partial_dimensions`
-  # will be different.
-  # (1) In the case of a vector this contains the number of elements in that
-  #     vector per site.
-  # (2) In the case of 2 columns, this contains the number of elements in
-  #     each column per site.
-  # (3) In the case of a data.frame, this contains the number of elements in
-  #     and the number of columns per site.
+  # Construct the global dimensions from the virtual data set
   global_dimensions <- vtg.chisq::global_dimensions(dimensions_and_totals)
 
   # In the case of a single vector we need to do some other things than in
-  # the case of a data.frame or x-by-y.
+  # the case of a data.frame
   data_class <- attributes(dimensions_and_totals[[1]])$class
   is_col <- ifelse(data_class == "chi.vector", TRUE, FALSE)
 
-  # In case `probabilities` is provided and we are dealing with DF or 2-by-2,
-  # we need warn the user that it is not used
+  # In case `probabilities` is provided and we are dealing with a
+  # `chi.data.frame` class, we need warn the user that it is not used.
   if (!is.null(probabilities) && !is_col) {
     log$warn("The `probabilities` argument is ignored when using DF mode.")
   }
 
-  # Depending on the number of `cols` the contents of `partial_totals` will be
-  # different.
-  # (1) In the case of a vector this contains the sum of elements in that
-  #     vector per site.
-  # (2) In the case of 2 columns .... TODO
-  # (3) In the case of a data.frame, this contains the totals of each row,
-  #     column and the total number of elements per site.
-  # Compute the global expectation and variance
   globals <- vtg.chisq::expectation(dimensions_and_totals, global_dimensions,
                                     probabilities, is_col)
-
-  # Now that the global expectation is computed, we can compute the local
-  # chi-squared statistic.
-  # Send back only he relevant part of E, now we send all expected values
-  # to each node while it only needs the expected values for its own
-  # data.
-  vtg::log$info("Making subtask to `compute_chi_squared` for each node.")
 
   if(!length(organizations_to_include) == length(dimensions_and_totals)){
     stop("organizations_to_include and dimensions_and_totals must be of
@@ -127,6 +105,7 @@ dchisq <- function(client, columns, probabilities = NULL,
   # the relevant part of the global E to each node.
   # FIXME: This is very slow as each result is awaited before the next task is
   # started. This needs to be fixed in the vtg client.
+  vtg::log$info("Making subtask to `compute_chi_squared` for each node.")
   idx <- 1
   node_chi_sq_statistic <- list()
   for (i in seq_along(organizations_to_include)) {
@@ -136,9 +115,9 @@ dchisq <- function(client, columns, probabilities = NULL,
     dims <- dimensions_and_totals[[i]]
 
     if (is_col) {
-      e_subset <- globals$E[idx:(idx + dims$number_of_rows - 1)]
+      e_subset <- globals$expected[idx:(idx + dims$number_of_rows - 1)]
     } else {
-      e_subset <- globals$E[idx:(idx + dims$number_of_rows - 1), ]
+      e_subset <- globals$expected[idx:(idx + dims$number_of_rows - 1), ]
     }
     idx <- idx + dims$number_of_rows
 
@@ -148,31 +127,26 @@ dchisq <- function(client, columns, probabilities = NULL,
                   expected_values = e_subset)
     )
   }
-  log$info("Results from `compute_chi_squared` received.")
+  vtg::log$info("Results from `compute_chi_squared` received.")
 
   # The local chi-squared statistic is computed, now we can compute the global
   # chi-squared statistic by summing the local chi-squared statistics.
   globals$chi_squared <- Reduce("+", node_chi_sq_statistic)
 
-  # The number of observations in the global dataset
-  globals$n_rows <- Reduce("+", lapply(dimensions_and_totals,
-                                       function(x) x$number_of_rows))
-
   # The expectancy matrix has the same dimensions as the global dataset, so
   # we can use it to compute the degrees of freedom.
-  globals$n_cols <- ncol(globals$E)
   if (is_col) {
     degrees_of_freedom <- global_dimensions$number_of_rows - 1
   } else {
-    degrees_of_freedom <- (globals$n_rows - 1) * (globals$n_cols - 1)
+    degrees_of_freedom <- ((global_dimensions$number_of_rows - 1) *
+                             (global_dimensions$number_of_columns - 1))
   }
+  vtg::log$debug("Degrees of freedom computed")
 
   # Use the global chi-squared value to compute to calculate the p-value
-  vtg::log$info("DF", degrees_of_freedom)
-  vtg::log$info(globals$chi_squared)
-
   pval <- stats::pchisq(globals$chi_squared, degrees_of_freedom,
                         lower.tail = FALSE)
+  vtg::log$debug("p-value computed")
 
   # Some beatification of the output, so that it is similar to the output of
   # `chisq.test`.
@@ -188,8 +162,9 @@ dchisq <- function(client, columns, probabilities = NULL,
 
   output <- list(statistic = globals$chi_squared,
                  parameter = degrees_of_freedom, pval = pval,
-                 method = method, residual.variance = globals$V,
-                 expected = globals$E)
+                 method = method, residual.variance = globals$variance,
+                 expected = globals$expected)
 
+  vtg::log$info("dchisq completed.")
   return(output)
 }
