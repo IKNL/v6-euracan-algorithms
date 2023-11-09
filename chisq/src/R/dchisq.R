@@ -3,15 +3,15 @@
 #' This version has built in `threshold` parameter that checks if any counts
 #' are less than tolerance. Default is 5. Can go lower (to 1). Up to data-owner.
 #' @param client `vtg::Client` instance provided by node (data station).
-#' @param col Can by single column name or N column name. If `2` column names,
-#' executes Chisq on Contingency table. Warning: Sends frequency distribution.
+#' @param columns Can by single column name or N column name. If `2` column
+#' names, executes Chisq on Contingency table. Warning: Sends frequency
+#' distribution.
 #' @param probabilities These are the probabilities needed. Default is `NULL`
 #' however the data-owner/researcher can supply their own. The length of which
 #' has to correspond to the "total" length of all combined dataset for given
-#' column(s). (!) Only used for the `col` analysis.
-#'
-#' TODO Missing values are ignored. Even when a single value is missing the
-#' whole row is removed. We should document this.
+#' column(s). (!) Only used for the `columns` analysis.
+#' @param organizations_to_include List of organizations to include in the
+#' analysis. This is a list of organization ids.
 #'
 #' @author Hasan Alradhi
 #' @author Matteo Cellamare
@@ -25,7 +25,7 @@
 #' @TODO setup build pipeline
 #' @TODO add test cases
 #'
-dchisq <- function(client, col, probabilities = NULL,
+dchisq <- function(client, columns, probabilities = NULL,
                    organizations_to_include = NULL) {
 
   # Create a logger
@@ -33,7 +33,7 @@ dchisq <- function(client, col, probabilities = NULL,
   log$set_threshold("debug")
 
   log$info("Initializing dchisq...")
-  log$debug("col: {col}")
+  log$debug("columns: {columns}")
   log$debug("probabilities: {probabilities}")
   log$debug("organizations_to_include: {organizations_to_include}")
 
@@ -48,7 +48,7 @@ dchisq <- function(client, col, probabilities = NULL,
   #
   if (client$use.master.container) {
     log$info("Running `dchisq.test` central container.")
-    result <- client$call("dchisq", col = col,
+    result <- client$call("dchisq", columns = columns,
                           probabilities = probabilities)
     return(result)
   }
@@ -63,7 +63,7 @@ dchisq <- function(client, col, probabilities = NULL,
   # Orchestration and Aggregation
   #
   log$info("Making subtask to `get_n_and_sums` for each node.")
-  dimensions_and_totals <- client$call("dimensions_and_totals", col = col)
+  dimensions_and_totals <- client$call("dimensions_and_totals", columns = columns)
   log$info("Results from `dimensions_and_totals` received.")
 
   # Validate that all nodes reported their dimensions and totals
@@ -144,7 +144,7 @@ dchisq <- function(client, col, probabilities = NULL,
 
     node_chi_sq_statistic <- append(
       node_chi_sq_statistic,
-      client$call("compute_chi_squared", col = col,
+      client$call("compute_chi_squared", columns = columns,
                   expected_values = e_subset)
     )
   }
