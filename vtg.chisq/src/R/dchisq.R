@@ -61,7 +61,7 @@ dchisq <- function(client, columns, probabilities = NULL,
   dimensions_and_totals <- client$call("dimensions_and_totals",
                                        columns = columns,
                                        subset_rules = subset_rules)
-  print(dimensions_and_totals)
+
   vtg::log$info("Results from `dimensions_and_totals` received.")
 
   # Validate that all nodes reported their dimensions and totals
