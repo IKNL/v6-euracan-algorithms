@@ -1,0 +1,29 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - '*/[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+    create-docker-image:
+        runs-on: ubuntu-latest
+
+        steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v2
+
+        - name: Extract Tag Information
+          id: tag_info
+          run: echo "::set-output name=tag::${{ github.ref }}"
+
+        - name: Set Algorithm Name Variable
+          id: algorithm
+          run: echo "::set-output name=algorithm::$(echo ${{ steps.tag_info.outputs.tag }} | cut -d '/' -f 1)"
+
+        - name: Extract Version from Tag
+          id: version
+          run: echo "::set-output name=version::$(echo ${{ steps.tag_info.outputs.tag }} | cut -d '/' -f 2)"
+
+        - name: Run Makefile Rule
+          run: make ${{ steps.algorithm.outputs.algorithm }} TAG="${{ steps.version.outputs.version }}"

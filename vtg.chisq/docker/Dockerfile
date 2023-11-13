@@ -10,7 +10,7 @@ ARG PKG_NAME='vtg.chisq'
 LABEL maintainer="Hasan Alradhi <h.alradhi@iknl.nl>"
 
 # Install federated chisq package
-COPY ./models/chisq/src /usr/local/R/${PKG_NAME}/
+COPY ./src /usr/local/R/${PKG_NAME}/
 
 WORKDIR /usr/local/R/${PKG_NAME}
 RUN Rscript -e 'library(devtools)' -e 'install_deps(".")'
