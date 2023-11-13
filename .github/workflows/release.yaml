@@ -19,11 +19,11 @@ jobs:
 
         - name: Set Algorithm Name Variable
           id: algorithm
-          run: echo "::set-output name=algorithm::$(echo ${{ steps.tag_info.outputs.tag }} | cut -d '/' -f 1)"
+          run: echo "::set-output name=algorithm::$(echo ${{ steps.tag_info.outputs.tag }} | cut -d '/' -f 3)"
 
         - name: Extract Version from Tag
           id: version
-          run: echo "::set-output name=version::$(echo ${{ steps.tag_info.outputs.tag }} | cut -d '/' -f 2)"
+          run: echo "::set-output name=version::$(echo ${{ steps.tag_info.outputs.tag }} | cut -d '/' -f 4)"
 
         - name: Run Makefile Rule
           run: make ${{ steps.algorithm.outputs.algorithm }} TAG="${{ steps.version.outputs.version }}"
