@@ -1,4 +1,4 @@
 TAG ?= dev
 
 x-squared:
-	cd ./chisq && make docker TAG=${TAG}
+	cd ./vtg.chisq && make docker TAG=${TAG}
