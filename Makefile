@@ -60,4 +60,5 @@ docker-build:
 
 docker-push: docker-build
 	docker push ${HOST}/${IMAGE}:${TAG}
+	docker push ${HOST}/${IMAGE}:latest
 
