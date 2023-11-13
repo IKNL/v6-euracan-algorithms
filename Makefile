@@ -1,5 +1,4 @@
 PKG_NAME ?= vtg.chisq
-DIR ?= $(shell pwd)/${PKG_NAME}
 HOST ?= harbor2.vantage6.ai
 IMAGE ?= starter/${PKG_NAME}
 TAG ?= dev
@@ -10,7 +9,7 @@ echo:
 	@echo "         tag: ${TAG}"
 	@echo ""
 
-vtg.chisq:
+vtg-chisq:
 	make docker IMAGE=starter/vtg.chisq
 
 build: install-deps document
@@ -39,7 +38,7 @@ DESCRIPTION:
 	@echo "    * command:                                       *" >> DESCRIPTION
 	@echo "    *   make DESCRIPTION                             *" >> DESCRIPTION
 	@echo "    **************************************************" >> DESCRIPTION
-	@sed "s/{{PKG_NAME}}/${PKG_NAME}/g" ./src/DESCRIPTION.tpl >> ./src/DESCRIPTION
+	@sed "s/{{PKG_NAME}}/${PKG_NAME}/g" ./${PKG_NAME}/src/DESCRIPTION.tpl >> ./${PKG_NAME}/src/DESCRIPTION
 
 document:
 	@Rscript -e "devtools::document(roclets=c('rd', 'collate', 'namespace', 'vignette'))"
@@ -56,7 +55,7 @@ docker-build:
 	   --build-arg PKG_NAME=${PKG_NAME} \
 	  -t ${IMAGE}:${TAG} \
 	  -t ${HOST}/${IMAGE}:${TAG} \
-	  ${DIR}
+	  .
 
 docker-push: docker-build
 	docker push ${HOST}/${IMAGE}:${TAG}

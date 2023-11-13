@@ -12,7 +12,7 @@
 #'
 #' @export
 
-extend <- function(data) {
+extend_data <- function(data) {
   require(dplyr)
 
   temp.data <- data

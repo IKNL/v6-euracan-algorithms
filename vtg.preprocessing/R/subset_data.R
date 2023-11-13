@@ -26,7 +26,8 @@
 #' or, for privacy preserving reasons, an empty data.frame (with the column
 #' names) if the subset of data has less than N rows.
 #'
-subset <- function(data, subset_rules) {
+#' @export
+subset_data <- function(data, subset_rules) {
 
   if (is.null(subset_rules)) {
     print("No subset rules are given.")
