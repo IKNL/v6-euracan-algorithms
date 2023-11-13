@@ -17,11 +17,11 @@
 #' @author Matteo Cellamare
 #' @author Frank Martin
 #'
-#' @TODO add Anja's preprocessing
 #' @TODO add test cases
+#' @TODO disclosure risk check is turned off
 #'
 dchisq <- function(client, columns, probabilities = NULL,
-                   organizations_to_include = NULL) {
+                   organizations_to_include = NULL, subset_rules = NULL) {
 
   # Create a logger
   vtg::log$set_threshold("debug")
@@ -43,7 +43,8 @@ dchisq <- function(client, columns, probabilities = NULL,
   if (client$use.master.container) {
     vtg::log$info("Running `dchisq.test` central container.")
     result <- client$call("dchisq", columns = columns,
-                          probabilities = probabilities)
+                          probabilities = probabilities,
+                          subset_rules = subset_rules)
     return(result)
   }
 
@@ -58,14 +59,16 @@ dchisq <- function(client, columns, probabilities = NULL,
   #
   vtg::log$info("Making subtask to `dimensions_and_totals` for each node.")
   dimensions_and_totals <- client$call("dimensions_and_totals",
-                                       columns = columns)
+                                       columns = columns,
+                                       subset_rules = subset_rules)
+  print(dimensions_and_totals)
   vtg::log$info("Results from `dimensions_and_totals` received.")
 
   # Validate that all nodes reported their dimensions and totals
   error <- FALSE
-  for (i in seq_along(dimensions_and_totals) ) {
-    if (!is.null(dimensions_and_totals[[i]]$error)) {
-      log$warn("Node {i} reported an error: {dimensions_and_totals[[i]]$error}")
+  for (res in dimensions_and_totals ) {
+    if (!is.null(res$error)) {
+      vtg::log$error("Node reported an error: {res$error}")
       error <- TRUE
     }
   }
@@ -119,7 +122,7 @@ dchisq <- function(client, columns, probabilities = NULL,
     node_chi_sq_statistic <- append(
       node_chi_sq_statistic,
       client$call("compute_chi_squared", columns = columns,
-                  expected_values = e_subset)
+                  expected_values = e_subset, subset_rules = subset_rules)
     )
   }
   vtg::log$info("Results from `compute_chi_squared` received.")

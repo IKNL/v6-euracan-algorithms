@@ -11,7 +11,11 @@
 #'
 #' @return A list containing the totals.
 #'
-RPC_dimensions_and_totals <- function(data, columns) {
+RPC_dimensions_and_totals <- function(data, subset_rules, columns) {
+
+  # Data pre-processing specific to EURACAN
+  data <- vtg.preprocessing::extend_data(data)
+  data <- vtg.preprocessing::subset_data(data, subset_rules)
 
   # Number of observations in the dataset before removing NA's
   n_raw <- nrow(data)
@@ -22,10 +26,10 @@ RPC_dimensions_and_totals <- function(data, columns) {
                 contained NA's.")
 
   # Disclosure risk checks
-  if (!check_disclosure_risk(data)) {
-    cat("Disclosure risks, aborting...")
-    return(list("error" = "Disclosure risk"))
-  }
+#   if (!check_disclosure_risk(data)) {
+#     cat("Disclosure risks, aborting...")
+#     return(list("error" = "Disclosure risk"))
+#   }
 
   if (is.data.frame(data_filtered)) {
 
@@ -74,7 +78,7 @@ check_disclosure_risk <- function(data) {
   if (is_data_frame){
     # Check that all column names are unique
     if (length(unique(colnames(data))) != length(colnames(data))) {
-      vtg::log$critical("You have repeated column names...")
+      vtg::log$error("You have repeated column names...")
       return(FALSE)
     }
 
@@ -96,7 +100,7 @@ check_disclosure_risk <- function(data) {
     # Check if any of the counts is lower than the threshold
 
     if (any(unlist(counts) < threshold)) {
-      vtg::log$critical("Disclosure risk, some values are lower than ",
+      vtg::log$error("Disclosure risk, some values are lower than ",
                         threshold)
       return(FALSE)
     }
