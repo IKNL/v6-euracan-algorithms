@@ -8,6 +8,7 @@ FROM harbor2.vantage6.ai/base/custom-r-base
 ARG PKG_NAME='vtg.chisq'
 
 LABEL maintainer="Hasan Alradhi <h.alradhi@iknl.nl>"
+LABEL maintainer="Frank Martin <f.martin@iknl.nl>"
 
 # Install federated chisq package
 COPY ./src /usr/local/R/${PKG_NAME}/

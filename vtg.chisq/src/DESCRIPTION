@@ -21,18 +21,3 @@ Imports:
 Remotes:
     iknl/vtg
 RoxygenNote: 7.2.3
-Package: vtg.chisq
-Type: Package
-Version: 1.0.0
-Title: vtg.chisq
-Description: This package can be used with the vantage6 federated
-    learning infrastructure (see https://github.com/IKNL/vantage6).
-Encoding: UTF-8
-LazyData: true
-Imports:
-    glue,
-    vtg,
-    stats
-Remotes:
-    iknl/vtg
-RoxygenNote: 7.2.3

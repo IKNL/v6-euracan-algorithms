@@ -18,7 +18,6 @@
 #' @author Frank Martin
 #'
 #' @TODO add Anja's preprocessing
-#' @TODO setup build pipeline
 #' @TODO add test cases
 #'
 dchisq <- function(client, columns, probabilities = NULL,
