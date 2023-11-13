@@ -9,7 +9,7 @@ echo:
 	@echo "         tag: ${TAG}"
 	@echo ""
 
-vtg-chisq:
+chisq:
 	make docker IMAGE=starter/vtg.chisq
 
 build: install-deps document
@@ -55,6 +55,7 @@ docker-build:
 	   --build-arg PKG_NAME=${PKG_NAME} \
 	  -t ${IMAGE}:${TAG} \
 	  -t ${HOST}/${IMAGE}:${TAG} \
+	  -t ${HOST}/${IMAGE}:latest \
 	  .
 
 docker-push: docker-build
