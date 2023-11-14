@@ -17,6 +17,7 @@
 #' @author Matteo Cellamare
 #' @author Frank Martin
 #'
+#' @TODO obtain image from the environment vars
 #' @TODO add test cases
 #' @TODO disclosure risk check is turned off
 #'
@@ -31,7 +32,7 @@ dchisq <- function(client, columns, probabilities = NULL,
   vtg::log$debug("probabilities: {probabilities}")
   vtg::log$debug("organizations_to_include: {organizations_to_include}")
 
-  image.name <- "harbor2.vantage6.ai/starter/chisq:latest"
+  image.name <- "harbor2.vantage6.ai/starter/vtg.chisq:latest"
   vtg::log$info("using image '{image.name}'")
 
   client$set.task.image(image.name, task.name = "chisq")
