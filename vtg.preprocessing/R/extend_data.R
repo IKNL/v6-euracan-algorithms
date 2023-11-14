@@ -42,7 +42,8 @@ extend_data <- function(data) {
       age >= 40 & age < 50 ~ 2,
       age >= 50 & age < 60 ~ 3,
       age >= 60 & age < 70 ~ 4,
-      age >= 70 ~ 5, TRUE ~ NA
+      age >= 70 ~ 5,
+      TRUE ~ NA_real_
     )) %>%
     # anni di  diagnosi e di follow-up
     mutate(year_diag = format(d01_diagdate, format = "%Y")) %>%
