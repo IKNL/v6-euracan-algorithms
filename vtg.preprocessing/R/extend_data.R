@@ -21,7 +21,7 @@ extend_data <- function(data) {
   print(ncol(temp.data))
 
   temp.data <- temp.data %>%
-    mutate(time2 = time + sample(1:20, n(), replace = TRUE)) %>%
+    # mutate(time2 = time + sample(1:20, n(), replace = TRUE)) %>%
     # creazione dei site combinato
     # mutate(site = ifelse(!is.na(d11_siterare),d11_siterare ,d11_sitecomrar))
     # la differenza tra questi due codici, uno ha la label e l altro no. QUALE ? MEGLIO TENERE?
