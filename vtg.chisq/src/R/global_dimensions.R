@@ -16,7 +16,7 @@ global_dimensions <- function(partials) {
   classes <- lapply(partials, function(x) attributes(x)$class)
 
   if (length(unique(classes)) != 1) {
-    vtg::log$critical("All nodes must have executed the same type of
+    vtg::log$error("All nodes must have executed the same type of
                         Chi-Square test.")
     stop("Mixed types of Chi-Square tests.")
   }
@@ -37,7 +37,7 @@ global_dimensions <- function(partials) {
     # not the case, this could be an attempt to disclose information.
     # therefore we stop the execution.
     if (length(unique(sapply(partials_dimensions, function(x) x[2]))) != 1) {
-      vtg::log$critical("Nodes reported different lengths for y.")
+      vtg::log$error("Nodes reported different lengths for y.")
       stop("Nodes reported different lengths for y.")
     }
 
@@ -50,7 +50,7 @@ global_dimensions <- function(partials) {
     return(list("number_of_rows" = x))
 
   } else {
-    vtg::log$critical("Unknown class of Chi-Square test.")
+    vtg::log$error("Unknown class of Chi-Square test.")
     stop("Unknown class of Chi-Square test.")
   }
 }
