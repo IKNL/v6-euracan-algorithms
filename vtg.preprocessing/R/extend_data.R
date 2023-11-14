@@ -11,7 +11,6 @@
 #' @return Original dataframe extended with new columns.
 #'
 #' @export
-
 extend_data <- function(data) {
   require(dplyr)
 
@@ -51,9 +50,9 @@ extend_data <- function(data) {
     mutate(yearF = format(h02_datelasfup, format = "%Y")) %>%
     # BMI
     mutate(BMI = ifelse(!is.na(b18_bmi), b18_bmi, b18b_bmimanu)) %>%
-    mutate(catBMI = ifelse(BMI < 18.5, 1, ifelse(BMI >= 18.5 & BMI < 25, 2, ifelse(BMI >= 25 & BMI < 30, 3, ifelse(BMI >= 30 & BMI != ".", 4, ifelse(BMI == ".", 999, NA)))))) %>%
-    mutate(stage = ifelse(e34_cstage %in% c(1, 2, 3), 1, ifelse(e34_cstage %in% c(4, 5, 6, 7), 2, ifelse(e34_cstage == 8 | (e34_cstage == 7 & siteName == 2) | (e34_cstage == 5 & siteName == 3 & d27_p16 == 1), 3, ifelse(e34_cstage == 999, 999, NA))))) %>%
-    mutate(pstage = ifelse(e54_pstage %in% c(1, 2, 3), 1, ifelse(e54_pstage %in% c(4, 5, 6, 7), 2, ifelse(e54_pstage == 8 | (e54_pstage == 7 & siteName == 2) | (e54_pstage == 5 & siteName == 3 & d27_p16 == 1), 3, ifelse(e54_pstage == 999, 999, NA))))) %>%
+    mutate(catBMI = ifelse(BMI < 18.5, 1, ifelse(BMI >= 18.5 & BMI < 25, 2, ifelse(BMI >= 25 & BMI < 30, 3, ifelse(BMI >= 30 & BMI != ".", 4, ifelse(BMI == ".", 999, NA_real_)))))) %>%
+    mutate(stage = ifelse(e34_cstage %in% c(1, 2, 3), 1, ifelse(e34_cstage %in% c(4, 5, 6, 7), 2, ifelse(e34_cstage == 8 | (e34_cstage == 7 & siteName == 2) | (e34_cstage == 5 & siteName == 3 & d27_p16 == 1), 3, ifelse(e34_cstage == 999, 999, NA_real_))))) %>%
+    mutate(pstage = ifelse(e54_pstage %in% c(1, 2, 3), 1, ifelse(e54_pstage %in% c(4, 5, 6, 7), 2, ifelse(e54_pstage == 8 | (e54_pstage == 7 & siteName == 2) | (e54_pstage == 5 & siteName == 3 & d27_p16 == 1), 3, ifelse(e54_pstage == 999, 999, NA_real_))))) %>%
     # creo una variabile che usi il patologico e se non c'? il clinico
     mutate(combstage = ifelse(is.na(e54_pstage) | e54_pstage == 999, e34_cstage, e54_pstage)) %>%
     # 1 se adk o salivary, 0 negli altri casi
@@ -86,7 +85,7 @@ extend_data <- function(data) {
       g8_01_progrel %in% c(1:2) ~ g8_03_date,
       g9_01_progrel %in% c(1:2) ~ g9_03_date,
       g10_01_progrel %in% c(1:2) ~ g10_03_date,
-      TRUE ~ NA
+      TRUE ~ NA_real_
     )) %>%
     # La data di follow-up deve sempre essere aggiornata, non puo esistere se c'? progressione una data di follow-up precedente-E un CHECK! Uso la
     # attenzione che se c'? una data NA questo mi restituisce NA
@@ -107,7 +106,7 @@ extend_data <- function(data) {
       g8_01_progrel %in% c(1:2) & (g8_04_local == 1) ~ g8_03_date,
       g9_01_progrel %in% c(1:2) & (g9_04_local == 1) ~ g9_03_date,
       g10_01_progrel %in% c(1:2) & (g10_04_local == 1) ~ g10_03_date,
-      TRUE ~ NA
+      TRUE ~ NA_real_
     )) %>%
     # mutate (datalc= ifelse(g1_01_progrel %in% c(1:2) & (g1_04_local==1), g1_03_date , ifelse(g2_01_progrel %in% c(1:2) & (g2_04_local==1), g2_03_date,  ifelse(g3_01_progrel %in% c(1:2) & (g3_04_local==1), g3_03_date,ifelse(g4_01_progrel %in% c(1:2) & (g4_04_local==1), g4_03_date,  ifelse(g5_01_progrel %in% c(1:2) & (g5_04_local==1), g5_03_date,  ifelse(g6_01_progrel %in% c(1:2)& (g6_04_local==1), g6_03_date,  ifelse(g7_01_progrel %in% c(1:2) & (g7_04_local==1), g7_03_date, ifelse(g8_01_progrel %in% c(1:2) & (g8_04_local==1), g8_03_date, ifelse(g9_01_progrel %in% c(1:2) & (g9_04_local==1), g9_03_date, ifelse(g10_01_progrel %in% c(1:2) & (g10_04_local==1), g10_03_date, NA))))))))))) %>%
 
@@ -135,7 +134,7 @@ extend_data <- function(data) {
       is.na(datelc) ~ 0,
       datelc1 < datelc ~ 0,
       datelc1 >= datelc ~ 1,
-      TRUE ~ NA
+      TRUE ~ NA_real_
     )) %>%
     mutate(sel2 = ifelse(stage != 3 & !is.na(LC), 1, 0)) %>%
     # per Matteo Cellamare, possiamo ottere il plot dell'incidenza cumulata ( 1-KM)
@@ -154,7 +153,7 @@ extend_data <- function(data) {
       g7_01_progrel %in% c(1, 2) & (g7_04_local == 1 | g7_05_regional == 1) ~ g7_03_date,
       g8_01_progrel %in% c(1, 2) & (g8_04_local == 1 | g8_05_regional == 1) ~ g8_03_date,
       g9_01_progrel %in% c(1, 2) & (g9_04_local == 1 | g9_05_regional == 1) ~ g9_03_date,
-      g10_01_progrel %in% c(1, 2) & (g10_04_local == 1 | g10_05_regional == 1) ~ g10_03_date, TRUE ~ NA
+      g10_01_progrel %in% c(1, 2) & (g10_04_local == 1 | g10_05_regional == 1) ~ g10_03_date, TRUE ~ NA_real_
     )) %>%
     # cosi ho che se ho un progressione su T N ed M  un evento, se ho ptrogressione Su M o morte o vivo sono censorizzati
 
@@ -178,7 +177,7 @@ extend_data <- function(data) {
       is.na(datelrc) ~ 0,
       datelrc1 < datelrc ~ 0,
       datelrc1 >= datelrc ~ 1,
-      TRUE ~ NA
+      TRUE ~ NA_real_
     )) %>%
     mutate(LRC = pmin(as.Date(datelrc), as.Date(datelrc1), na.rm = TRUE) - pmin(as.Date(f02_datesurg), as.Date(f33_1_startdate_syst), as.Date(f80_radiostartdate), na.rm = TRUE)) %>%
     as.data.frame()
