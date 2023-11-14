@@ -75,17 +75,17 @@ extend_data <- function(data) {
     # Genero la data di progressione
     # mutate(dataprog = pmax(g1_03_date,g2_03_date,g3_03_date,g4_03_date,g5_03_date,g6_03_date,g7_03_date,g8_03_date,g9_03_date,g10_03_date, na.rm = TRUE)) %>%
     mutate(dataprog = case_when(
-      g1_01_progrel %in% c(1:2) ~ g1_03_date,
-      g2_01_progrel %in% c(1:2) ~ g2_03_date,
-      g3_01_progrel %in% c(1:2) ~ g3_03_date,
-      g4_01_progrel %in% c(1:2) ~ g4_03_date,
-      g5_01_progrel %in% c(1:2) ~ g5_03_date,
-      g6_01_progrel %in% c(1:2) ~ g6_03_date,
-      g7_01_progrel %in% c(1:2) ~ g7_03_date,
-      g8_01_progrel %in% c(1:2) ~ g8_03_date,
-      g9_01_progrel %in% c(1:2) ~ g9_03_date,
-      g10_01_progrel %in% c(1:2) ~ g10_03_date,
-      TRUE ~ NA_real_
+      g1_01_progrel %in% c(1:2) ~ as.character(g1_03_date),
+      g2_01_progrel %in% c(1:2) ~ as.character(g2_03_date),
+      g3_01_progrel %in% c(1:2) ~ as.character(g3_03_date),
+      g4_01_progrel %in% c(1:2) ~ as.character(g4_03_date),
+      g5_01_progrel %in% c(1:2) ~ as.character(g5_03_date),
+      g6_01_progrel %in% c(1:2) ~ as.character(g6_03_date),
+      g7_01_progrel %in% c(1:2) ~ as.character(g7_03_date),
+      g8_01_progrel %in% c(1:2) ~ as.character(g8_03_date),
+      g9_01_progrel %in% c(1:2) ~ as.character(g9_03_date),
+      g10_01_progrel %in% c(1:2) ~ as.character(g10_03_date),
+      TRUE ~ NA_character_
     )) %>%
     # La data di follow-up deve sempre essere aggiornata, non puo esistere se c'? progressione una data di follow-up precedente-E un CHECK! Uso la
     # attenzione che se c'? una data NA questo mi restituisce NA
@@ -96,33 +96,33 @@ extend_data <- function(data) {
     # LC considera come evento la prima recidiva locale (su T) a prescindere dal fatto che sviluppi metastasie/o regionale (su N) o sia deceduto (in tal caso sarà censorizzato alla data di ultimo follow up)
     # DA VERIFICARE CON STEFANO: cosa succede se ho la progressione su T, N ed M? Io l ho messo come evento
     mutate(datelc = case_when(
-      g1_01_progrel %in% c(1:2) & (g1_04_local == 1) ~ g1_03_date,
-      g2_01_progrel %in% c(1:2) & (g2_04_local == 1) ~ g2_03_date,
-      g3_01_progrel %in% c(1:2) & (g3_04_local == 1) ~ g3_03_date,
-      g4_01_progrel %in% c(1:2) & (g4_04_local == 1) ~ g4_03_date,
-      g5_01_progrel %in% c(1:2) & (g5_04_local == 1) ~ g5_03_date,
-      g6_01_progrel %in% c(1:2) & (g6_04_local == 1) ~ g6_03_date,
-      g7_01_progrel %in% c(1:2) & (g7_04_local == 1) ~ g7_03_date,
-      g8_01_progrel %in% c(1:2) & (g8_04_local == 1) ~ g8_03_date,
-      g9_01_progrel %in% c(1:2) & (g9_04_local == 1) ~ g9_03_date,
-      g10_01_progrel %in% c(1:2) & (g10_04_local == 1) ~ g10_03_date,
-      TRUE ~ NA_real_
+      g1_01_progrel %in% c(1:2) & (g1_04_local == 1) ~ as.character(g1_03_date),
+      g2_01_progrel %in% c(1:2) & (g2_04_local == 1) ~ as.character(g2_03_date),
+      g3_01_progrel %in% c(1:2) & (g3_04_local == 1) ~ as.character(g3_03_date),
+      g4_01_progrel %in% c(1:2) & (g4_04_local == 1) ~ as.character(g4_03_date),
+      g5_01_progrel %in% c(1:2) & (g5_04_local == 1) ~ as.character(g5_03_date),
+      g6_01_progrel %in% c(1:2) & (g6_04_local == 1) ~ as.character(g6_03_date),
+      g7_01_progrel %in% c(1:2) & (g7_04_local == 1) ~ as.character(g7_03_date),
+      g8_01_progrel %in% c(1:2) & (g8_04_local == 1) ~ as.character(g8_03_date),
+      g9_01_progrel %in% c(1:2) & (g9_04_local == 1) ~ as.character(g9_03_date),
+      g10_01_progrel %in% c(1:2) & (g10_04_local == 1) ~ as.character(g10_03_date),
+      TRUE ~ NA_character_
     )) %>%
     # mutate (datalc= ifelse(g1_01_progrel %in% c(1:2) & (g1_04_local==1), g1_03_date , ifelse(g2_01_progrel %in% c(1:2) & (g2_04_local==1), g2_03_date,  ifelse(g3_01_progrel %in% c(1:2) & (g3_04_local==1), g3_03_date,ifelse(g4_01_progrel %in% c(1:2) & (g4_04_local==1), g4_03_date,  ifelse(g5_01_progrel %in% c(1:2) & (g5_04_local==1), g5_03_date,  ifelse(g6_01_progrel %in% c(1:2)& (g6_04_local==1), g6_03_date,  ifelse(g7_01_progrel %in% c(1:2) & (g7_04_local==1), g7_03_date, ifelse(g8_01_progrel %in% c(1:2) & (g8_04_local==1), g8_03_date, ifelse(g9_01_progrel %in% c(1:2) & (g9_04_local==1), g9_03_date, ifelse(g10_01_progrel %in% c(1:2) & (g10_04_local==1), g10_03_date, NA))))))))))) %>%
 
 
     # lc1 ? per definire se ha una recidiva/progressione su N o M oppure se ? morto per altre cause
     mutate(datelc1 = case_when(
-      g1_01_progrel %in% c(1:2) & (g1_04_local != 1) ~ g1_03_date,
-      g2_01_progrel %in% c(1:2) & (g2_04_local != 1) ~ g2_03_date,
-      g3_01_progrel %in% c(1:2) & (g3_04_local != 1) ~ g3_03_date,
-      g4_01_progrel %in% c(1:2) & (g4_04_local != 1) ~ g4_03_date,
-      g5_01_progrel %in% c(1:2) & (g5_04_local != 1) ~ g5_03_date,
-      g6_01_progrel %in% c(1:2) & (g6_04_local != 1) ~ g6_03_date,
-      g7_01_progrel %in% c(1:2) & (g7_04_local != 1) ~ g7_03_date,
-      g8_01_progrel %in% c(1:2) & (g8_04_local != 1) ~ g8_03_date,
-      g9_01_progrel %in% c(1:2) & (g9_04_local != 1) ~ g9_03_date,
-      g10_01_progrel %in% c(1:2) & (g10_04_local != 1) ~ g10_03_date,
+      g1_01_progrel %in% c(1:2) & (g1_04_local != 1) ~ as.character(g1_03_date),
+      g2_01_progrel %in% c(1:2) & (g2_04_local != 1) ~ as.character(g2_03_date),
+      g3_01_progrel %in% c(1:2) & (g3_04_local != 1) ~ as.character(g3_03_date),
+      g4_01_progrel %in% c(1:2) & (g4_04_local != 1) ~ as.character(g4_03_date),
+      g5_01_progrel %in% c(1:2) & (g5_04_local != 1) ~ as.character(g5_03_date),
+      g6_01_progrel %in% c(1:2) & (g6_04_local != 1) ~ as.character(g6_03_date),
+      g7_01_progrel %in% c(1:2) & (g7_04_local != 1) ~ as.character(g7_03_date),
+      g8_01_progrel %in% c(1:2) & (g8_04_local != 1) ~ as.character(g8_03_date),
+      g9_01_progrel %in% c(1:2) & (g9_04_local != 1) ~ as.character(g9_03_date),
+      g10_01_progrel %in% c(1:2) & (g10_04_local != 1) ~ as.character(g10_03_date),
       TRUE ~ h02_datelasfup
     )) %>%
     # mutate (datalc1= ifelse(g1_01_progrel %in% c(1:2) & (g1_04_local!=1), g1_03_date , ifelse(g2_01_progrel %in% c(1:2) & (g2_04_local!=1), g2_03_date,  ifelse(g3_01_progrel %in% c(1:2) & (g3_04_local!=1), g3_03_date,ifelse(g4_01_progrel %in% c(1:2) & (g4_04_local!=1), g4_03_date,  ifelse(g5_01_progrel %in% c(1:2) & (g5_04_local!=1), g5_03_date,  ifelse(g6_01_progrel %in% c(1:2)& (g6_04_local!=1), g6_03_date,  ifelse(g7_01_progrel %in% c(1:2) & (g7_04_local!=1), g7_03_date, ifelse(g8_01_progrel %in% c(1:2) & (g8_04_local!=1), g8_03_date, ifelse(g9_01_progrel %in% c(1:2) & (g9_04_local!=1), g9_03_date, ifelse(g10_01_progrel %in% c(1:2) & (g10_04_local!=1), g10_03_date,h02_datelasfup ))))))))))) %>%
@@ -144,32 +144,34 @@ extend_data <- function(data) {
 
     # datelrc mi da la data di un evento locoregionale
     mutate(datelrc = case_when(
-      g1_01_progrel %in% c(1, 2) & (g1_04_local == 1 | g1_05_regional == 1) ~ g1_03_date,
-      g2_01_progrel %in% c(1, 2) & (g2_04_local == 1 | g2_05_regional == 1) ~ g2_03_date,
-      g3_01_progrel %in% c(1, 2) & (g3_04_local == 1 | g3_05_regional == 1) ~ g3_03_date,
-      g4_01_progrel %in% c(1, 2) & (g4_04_local == 1 | g4_05_regional == 1) ~ g4_03_date,
-      g5_01_progrel %in% c(1, 2) & (g5_04_local == 1 | g5_05_regional == 1) ~ g5_03_date,
-      g6_01_progrel %in% c(1, 2) & (g6_04_local == 1 | g6_05_regional == 1) ~ g6_03_date,
-      g7_01_progrel %in% c(1, 2) & (g7_04_local == 1 | g7_05_regional == 1) ~ g7_03_date,
-      g8_01_progrel %in% c(1, 2) & (g8_04_local == 1 | g8_05_regional == 1) ~ g8_03_date,
-      g9_01_progrel %in% c(1, 2) & (g9_04_local == 1 | g9_05_regional == 1) ~ g9_03_date,
-      g10_01_progrel %in% c(1, 2) & (g10_04_local == 1 | g10_05_regional == 1) ~ g10_03_date, TRUE ~ NA_real_
+      g1_01_progrel %in% c(1, 2) & (g1_04_local == 1 | g1_05_regional == 1) ~ as.character(g1_03_date),
+      g2_01_progrel %in% c(1, 2) & (g2_04_local == 1 | g2_05_regional == 1) ~ as.character(g2_03_date),
+      g3_01_progrel %in% c(1, 2) & (g3_04_local == 1 | g3_05_regional == 1) ~ as.character(g3_03_date),
+      g4_01_progrel %in% c(1, 2) & (g4_04_local == 1 | g4_05_regional == 1) ~ as.character(g4_03_date),
+      g5_01_progrel %in% c(1, 2) & (g5_04_local == 1 | g5_05_regional == 1) ~ as.character(g5_03_date),
+      g6_01_progrel %in% c(1, 2) & (g6_04_local == 1 | g6_05_regional == 1) ~ as.character(g6_03_date),
+      g7_01_progrel %in% c(1, 2) & (g7_04_local == 1 | g7_05_regional == 1) ~ as.character(g7_03_date),
+      g8_01_progrel %in% c(1, 2) & (g8_04_local == 1 | g8_05_regional == 1) ~ as.character(g8_03_date),
+      g9_01_progrel %in% c(1, 2) & (g9_04_local == 1 | g9_05_regional == 1) ~ as.character(g9_03_date),
+      g10_01_progrel %in% c(1, 2) & (g10_04_local == 1 | g10_05_regional == 1) ~ as.character(g10_03_date),
+      TRUE ~ NA_character_
     )) %>%
     # cosi ho che se ho un progressione su T N ed M  un evento, se ho ptrogressione Su M o morte o vivo sono censorizzati
 
     # mi d? la data di un evento censura di sola progressione M+o morte) in caso di mancante alla fine metto il follow-up
 
     mutate(datelrc1 = case_when(
-      g1_01_progrel %in% c(1, 2) & (g1_06_meta == 1) & g1_04_local != 1 & g1_05_regional != 1 ~ g1_03_date,
-      g2_01_progrel %in% c(1, 2) & (g2_06_meta == 1) & g2_04_local != 1 & g2_05_regional != 1 ~ g2_03_date,
-      g3_01_progrel %in% c(1, 2) & (g3_06_meta == 1) & g3_04_local != 1 & g3_05_regional != 1 ~ g3_03_date,
-      g4_01_progrel %in% c(1, 2) & (g4_06_meta == 1) & g4_04_local != 1 & g4_05_regional != 1 ~ g4_03_date,
-      g5_01_progrel %in% c(1, 2) & (g5_06_meta == 1) & g5_04_local != 1 & g5_05_regional != 1 ~ g5_03_date,
-      g6_01_progrel %in% c(1, 2) & (g6_06_meta == 1) & g6_04_local != 1 & g6_05_regional != 1 ~ g6_03_date,
-      g7_01_progrel %in% c(1, 2) & (g7_06_meta == 1) & g7_04_local != 1 & g7_05_regional != 1 ~ g7_03_date,
-      g8_01_progrel %in% c(1, 2) & (g8_06_meta == 1) & g8_04_local != 1 & g8_05_regional != 1 ~ g8_03_date,
-      g9_01_progrel %in% c(1, 2) & (g9_06_meta == 1) & g9_04_local != 1 & g9_05_regional != 1 ~ g9_03_date,
-      g10_01_progrel %in% c(1, 2) & (g10_06_meta == 1) & g10_04_local != 1 & g10_05_regional != 1 ~ g10_03_date, TRUE ~ h02_datelasfup
+      g1_01_progrel %in% c(1, 2) & (g1_06_meta == 1) & g1_04_local != 1 & g1_05_regional != 1 ~ as.character(g1_03_date),
+      g2_01_progrel %in% c(1, 2) & (g2_06_meta == 1) & g2_04_local != 1 & g2_05_regional != 1 ~ as.character(g2_03_date),
+      g3_01_progrel %in% c(1, 2) & (g3_06_meta == 1) & g3_04_local != 1 & g3_05_regional != 1 ~ as.character(g3_03_date),
+      g4_01_progrel %in% c(1, 2) & (g4_06_meta == 1) & g4_04_local != 1 & g4_05_regional != 1 ~ as.character(g4_03_date),
+      g5_01_progrel %in% c(1, 2) & (g5_06_meta == 1) & g5_04_local != 1 & g5_05_regional != 1 ~ as.character(g5_03_date),
+      g6_01_progrel %in% c(1, 2) & (g6_06_meta == 1) & g6_04_local != 1 & g6_05_regional != 1 ~ as.character(g6_03_date),
+      g7_01_progrel %in% c(1, 2) & (g7_06_meta == 1) & g7_04_local != 1 & g7_05_regional != 1 ~ as.character(g7_03_date),
+      g8_01_progrel %in% c(1, 2) & (g8_06_meta == 1) & g8_04_local != 1 & g8_05_regional != 1 ~ as.character(g8_03_date),
+      g9_01_progrel %in% c(1, 2) & (g9_06_meta == 1) & g9_04_local != 1 & g9_05_regional != 1 ~ as.character(g9_03_date),
+      g10_01_progrel %in% c(1, 2) & (g10_06_meta == 1) & g10_04_local != 1 & g10_05_regional != 1 ~ as.character(g10_03_date),
+      TRUE ~ h02_datelasfup
     )) %>%
     # creo l evento, 1 se LRC ? presente 0 se invece c'? prima la morte o la metastasi
     # METTI IFELSe
