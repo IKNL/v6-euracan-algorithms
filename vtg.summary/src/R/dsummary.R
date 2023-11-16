@@ -1,13 +1,14 @@
 #' Federated Summary algorithm.
 #'
-#' This version has built in `threshold` parameter that checks if any counts
-#' are less than tolerance. Default is 5. Can go lower (to 1). Up to data-owner.
-#' @param client vtg::Client instance provided by node (datastation).
-#' @param columns Can by single column name or N column name.
-#' @param threshold Disclosure check. Default is 5, if number of counts in
-#' any cell is less than `threshold` the function stops and returns an error
-#' message.
+#' The summary algorithm aims to provide statistics about the data per column,
+#' such as the number of missing values, length, sum and range.
+#'
+#' @param client vtg::Client instance provided by node.
+#' @param columns List of column names to compute the summary for.
+#' @param threshold Minimum count in any result before error message is returned
+#' because the result may be disclosive. Default is 5.
 #' @param types types to subset data with.
+#' @param organizations_to_include organizations to include in the computation.
 #'
 #' @return a list of combined summary statistics aggregated about all
 #' datastation(s) in the study. It will return  a list containing the
@@ -24,12 +25,10 @@
 #' @author Hasan Alradhi
 #' @author Matteo Cellamare
 #' @author Frank Martin
-#'
-#' @export
+#' @author Bart van Beusekom
 #'
 dsummary <- function(client, columns, threshold = 5L, types = NULL,
-                     organizations_to_include = NULL){
-
+                     organizations_to_include = NULL) {
   # Create logger
   vtg::log$set_threshold("debug")
 
@@ -45,12 +44,13 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
   # is set to TRUE and this part is run.
   #
   if (client$use.master.container) {
-    log$info("Running `dsummary` in master container using
-                            image '{image.name}'..")
+    vtg::log$info("Running `dsummary` central container")
     result <- client$call(
       "dsummary",
-      col = columns,
-      threshold = threshold
+      columns = columns,
+      threshold = threshold,
+      types = types,
+      organizations_to_include = organizations_to_include
     )
     return(result)
   }
@@ -64,30 +64,31 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
   #
   # Orchestration and Aggregation
   #
-  log$info("Computing Summary. Warning: If your data is factor calculations
+  vtg::log$info("Computing Summary. Warning: If your data is factor calculations
             such as sum, mean, squared-deviance and variance are not
             applicable.")
 
-  log$info("Computing initial statistics...")
-  initial.statistics <- client$call(
-    "get_statistics",
-    col = columns,
+  vtg::log$info("Computing initial statistics...")
+  initial_statistics <- client$call(
+    "summary",
+    columns = columns,
     threshold = threshold,
     types = types
   )
+  print(initial_statistics)
 
   ###########################################
   # Separating pieces of initial statistics #
   ###########################################
-  log$info("Aggregating length of missing data...")
-  node.nas <- lapply(initial.statistics, function(results){
-    results[["data.na"]]
+  vtg::log$info("Aggregating length of missing data...")
+  node.nas <- lapply(initial_statistics, function(results){
+    results[["nan_count"]]
   })
   glob.nas <- vtg.summary::comb_na(node.nas, columns)
 
-  log$info("Aggregating node specific data lengths...")
-  node.lengths <- lapply(initial.statistics, function(results){
-    results[["data.lengths"]]})
+  vtg::log$info("Aggregating node specific data lengths...")
+  node.lengths <- lapply(initial_statistics, function(results){
+    results[["column_lengths"]]})
   glob.lens <- vector(length=length(unique(columns)))
   names(glob.lens) = unique(columns)
   for(colName in unique(columns)){
@@ -100,19 +101,19 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
     glob.lens[[colName]] <- sum(identifies.values.of.columns)
   }
 
-  log$info("Aggregating node specific sums...")
-  node.sums <- lapply(initial.statistics, function(results){
-    results[["data.sums"]]})
+  vtg::log$info("Aggregating node specific sums...")
+  node.sums <- lapply(initial_statistics, function(results){
+    results[["column_sums"]]})
   glob.sums <- vtg.summary::comb_sums(node.sums, columns)
 
 
-  log$info("Aggregating node specific ranges...")
-  node.range <- lapply(initial.statistics, function(results){
-    results[["data.range"]]})
+  vtg::log$info("Aggregating node specific ranges...")
+  node.range <- lapply(initial_statistics, function(results){
+    results[["column_ranges"]]})
   glob.range <- vtg.summary::comb_range(node.range, columns)
 
-  log$info("Aggregating useable rows...")
-  node.useable.rows <- lapply(initial.statistics, function(results){
+  vtg::log$info("Aggregating useable rows...")
+  node.useable.rows <- lapply(initial_statistics, function(results){
       results[["data.useable.rows"]]
   })
   glob.useable.rows <- Reduce("sum", node.useable.rows)
@@ -123,23 +124,23 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
   # :@ R is still assigning rownames!!
   rownames(node.useable.rows.df) <- NULL
 
-  log$info("Computing global means...")
+  vtg::log$info("Computing global means...")
   glob.mean <- vtg.summary::glob_mean(glob.sums, glob.lens, columns)
 
-  log$info("Calculating node specific squared deviance...")
+  vtg::log$info("Calculating node specific squared deviance...")
   node.sqr.dev <- client$call(
     "sqr_dev",
     col = columns,
     glob.mean = glob.mean
   )
 
-  log$info("Aggregating squared deviance...")
+  vtg::log$info("Aggregating squared deviance...")
   glob.sqr.dev <- vtg.summary::comb_sums(node.sqr.dev, columns)
 
-  log$info("Calculating global variance...")
+  vtg::log$info("Calculating global variance...")
   glob.var <- vtg.summary::glob_var(glob.sqr.dev, glob.lens, columns)
 
-  log$info("Calculating global standard deviation")
+  vtg::log$info("Calculating global standard deviation")
   glob.sd <- sapply(glob.var, sqrt)
 
   return(
