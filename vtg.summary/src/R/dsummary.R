@@ -75,7 +75,14 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
     threshold = threshold,
     types = types
   )
-  print(initial_statistics)
+
+  # catch errors for nodes
+  for (node_statistics in initial_statistics) {
+    if ("error" %in% names(node_statistics)) {
+      vtg::log$error("Error in initial statistics. Check logs of subtasks.")
+      return(node_statistics)
+    }
+  }
 
   ###########################################
   # Separating pieces of initial statistics #

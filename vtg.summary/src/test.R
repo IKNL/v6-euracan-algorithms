@@ -5,12 +5,15 @@ devtools::load_all("./vtg.preprocessing")
 # data <- read.csv("C:/Users/bbe2101.54580/data/vantage6/starter/DB.csv", header = TRUE, sep = ";")
 # print("data loaded")
 
-# create fake data
+# create fake data. Three columns with random numbers, two columns with factors
 set.seed(123L);
-data <- data.frame("X" = sample(1:10, size = 1000, replace = T),
-                   "Y" = sample(c(1:3, NA), size= 1000, replace = T),
-                   "Z" = sample(c(6:19, NA), size= 1000, replace = T),
-                   "T" = sample(gl(10, 100), size = 1000, replace = T))
+columns = c("A", "B", "C", "D", "E")
+data <- data.frame("A" = sample(1:10, size = 1000, replace = TRUE),
+                   "B" = sample(c(1:3, NA), size= 1000, replace = TRUE),
+                   "C" = sample(c(6:19, NA), size= 1000, replace = TRUE),
+                   "D" = sample(gl(10, 100), size = 1000, replace = TRUE),
+                   "E" = sample(factor(as.character(c("female", "male", NA))),
+                                size = 1000, replace = TRUE))
 
 # Split the dataframe into two sets
 n_rows <- nrow(data)
@@ -32,7 +35,6 @@ organizations_to_include <- c(1,2)
 log <- lgr::get_logger("vtg/MockClient")$set_threshold("debug")
 log <- lgr::get_logger("vtg/Client")$set_threshold("debug")
 
-columns = c("X", "Y", "Z", "T")
 threshold = 5L
 types=NULL
 
@@ -44,10 +46,11 @@ federated_result <- vtg.summary::dsummary(
   # organizations_to_include=organizations_to_include,
 )
 
-
+print("federated result")
 print(federated_result)
+
 # check values
-stopifnot(federated_result$global.useable.rows == 695)
+stopifnot("global.nas" %in% names(federated_result))
 stopifnot(federated_result$global.means[1] == 5.698)
 stopifnot(abs(federated_result$global.means[2] == 2.009259) < 0.0001)
 stopifnot(abs(federated_result$global.means[3] == 12.590022) < 0.0001)
@@ -56,6 +59,47 @@ stopifnot(federated_result$global.nas[1] == 0)
 stopifnot(federated_result$global.nas[2] == 244)
 stopifnot(federated_result$global.nas[3] == 78)
 stopifnot(federated_result$global.nas[4] == 0)
+stopifnot(federated_result$global.nas[1] + federated_result$global.lengths[1] == 1000)
+stopifnot(federated_result$global.nas[2] + federated_result$global.lengths[2] == 1000)
+stopifnot(federated_result$global.nas[3] + federated_result$global.lengths[3] == 1000)
+stopifnot(federated_result$global.nas[4] + federated_result$global.lengths[4] == 1000)
+stopifnot(federated_result$global.useable.rows == 479)
 # stopifnot(abs(federate_result$nod))
+
+
+# # set different threshold that should fail
+# threshold = 500L
+# federated_result <- vtg.summary::dsummary(
+#   client,
+#   columns,
+#   threshold=threshold,
+#   types=types,
+#   # organizations_to_include=organizations_to_include,
+# )
+# print("federated result")
+# print(federated_result)
+# stopifnot("error" %in% names(federated_result))
+# stopifnot(startsWith(federated_result$error,
+#                      "Disclosure risk, not enough observations in columns"))
+
+
+# # And yet another threshold, which should give a different error
+# threshold = 100L
+# federated_result <- vtg.summary::dsummary(
+#   client,
+#   columns,
+#   threshold=threshold,
+#   types=types,
+#   # organizations_to_include=organizations_to_include,
+# )
+# print("federated result")
+# print(federated_result)
+# stopifnot("error" %in% names(federated_result))
+# stopifnot(startsWith(
+#   federated_result$error,
+#   "Disclosure risk, not enough observations in some categories of factorial"
+# ))
+
+
 
 print("all tests succeeded")
