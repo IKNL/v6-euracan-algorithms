@@ -22,6 +22,9 @@ comb_range <- function(node.range, col){
     for(j in uniq.col){
         temp <- lapply(node.range, function(x) x[[j]])
         temp <- temp[!sapply(temp, is.null)]
+        # print("temp")
+        # print(temp)
+        # blub
         if(all(sapply(temp, class) == "table")){
             temp.tab <- Reduce("c", lapply(temp, function(x) x))
             out[[j]] <- tapply(temp.tab, names(temp.tab), sum)

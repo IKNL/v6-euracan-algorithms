@@ -16,7 +16,7 @@
 #' @return A list with the following results for each column: length, sum,
 #' range and number of rows with non-empty and empty values.
 #'
-#' @TODO check if column names are in the data
+#' @TODO check if works with single column
 RPC_summary <- function(data, columns, threshold=5L, types=NULL){
 
   # Assign types
@@ -41,8 +41,11 @@ RPC_summary <- function(data, columns, threshold=5L, types=NULL){
   }
   factor_columns = columns[sapply(data[, columns], is.factor)]
 
-  # keep only requested columns
-  data <- data[, columns]
+  # keep only requested columns. Cast to data.frame to avoid issues with
+  # single column data.frames. Then, set the column names explicitly because
+  # those are lost when casting to data.frame for single column data.frames.
+  data <- as.data.frame(data[, columns])
+  names(data) <- columns
 
   # count number of NA's
   nan_count <- colSums(is.na(data))
@@ -56,7 +59,7 @@ RPC_summary <- function(data, columns, threshold=5L, types=NULL){
   }
 
   # compute sum
-  column_sums <- compute_sums(data, columns)
+  column_sums <- get_column_sums(data, columns)
 
   # compute data range
   column_ranges <- get_column_ranges(data, columns)
@@ -69,8 +72,15 @@ RPC_summary <- function(data, columns, threshold=5L, types=NULL){
     return(disclosive_msg_factorial(column_ranges, factor_columns, threshold))
   }
 
-  # compute number of rows with values
-  data.useable.rows <- useable.rows.data(data, columns, threshold)
+  # compute number of rows with values in all columns
+  complete_rows <- nrow(na.omit(data)) # sum(apply(data, 1, anyNA))
+  if (complete_rows < threshold) {
+    msg <- glue::glue(
+      "Disclosure risk, not enough rows without NAs"
+    )
+    vtg::log$error(msg)
+    return(list("error" = msg))
+  }
 
   return(
     list(
@@ -78,9 +88,35 @@ RPC_summary <- function(data, columns, threshold=5L, types=NULL){
       "column_lengths" = column_lengths,
       "column_sums" = column_sums,
       "column_ranges" = column_ranges,
-      "data.useable.rows" = data.useable.rows
+      "complete_rows" = complete_rows
     )
   )
+}
+
+get_column_sums <- function(data, columns){
+  # compute sum per column. If column is a factor, return NaN
+  sums = (Reduce(`c`, lapply(columns, function(col_name){
+    if (is.factor(data[, col_name])) {
+      return(NaN)
+    } else if (is.numeric(data[, col_name])) {
+      return(sum(data[, col_name], na.rm = TRUE))
+    }
+  })))
+  names(sums) <- columns
+  return(sums)
+}
+
+get_column_ranges <- function(data, columns) {
+  # compute range per column. If column is a factor, return a table of values
+  col_ranges = lapply(columns, function(col_name){
+    if (is.factor(data[, col_name])) {
+      return(table(data[, col_name]))
+    } else if (is.numeric(data[, col_name])) {
+      return(range(data[, col_name], na.rm = TRUE))
+    }
+  })
+  names(col_ranges) <- columns
+  return(col_ranges)
 }
 
 get_columns_in_data <- function(data, columns){
@@ -134,75 +170,4 @@ disclosive_msg_factorial <- function(col_ranges, factorial_cols, threshold) {
   )
   vtg::log$error(msg)
   return(list("error" = msg))
-}
-
-compute_sums <- function(data, columns){
-  # compute sum per column. If column is a factor, return NaN
-  sums = (Reduce(`c`, lapply(columns, function(col_name){
-    if (is.factor(data[, col_name])) {
-      return(NaN)
-    } else if (is.numeric(data[, col_name])) {
-      return(sum(data[, col_name], na.rm = TRUE))
-    }
-  })))
-  names(sums) <- columns
-  return(sums)
-}
-
-# we don't want to run on small tabular data due to disclosive risk
-disclosure.check.tab <- function(tab, threshold=5L){
-    if(any(tab < threshold)){
-        stop(paste0("Disclosure risk, some values in '", colName,
-                    "' are lower than ", threshold))
-    }else{
-        tab
-    }
-}
-
-get_column_ranges <- function(data, columns) {
-  # compute range per column. If column is a factor, return a table of values
-  col_ranges = lapply(columns, function(col_name){
-    if (is.factor(data[, col_name])) {
-      return(table(data[, col_name]))
-    } else if (is.numeric(data[, col_name])) {
-      return(range(data[, col_name], na.rm = TRUE))
-    }
-  })
-  names(col_ranges) <- columns
-  return(col_ranges)
-}
-
-range.fn <- function(data, columns, column_lengths, threshold=5L){
-    range.per.column <- lapply(columns, function(colName){
-        dt <- na.omit(data[,colName])
-        if(column_lengths[colName] == 0){
-             NULL
-        }else if(is.factor(dt)){
-            disclosure.check.tab(table(dt), threshold)
-        }else{
-            range(dt)
-        }
-    })
-    names(range.per.column) <- columns
-    return(range.per.column)
-}
-
-# Different function to lengths because this tells you as a whole,
-# how many useable rows are there in the dataset.
-useable.rows.data <- function(data, columns, threshold=5L){
-    dt <- na.omit(data[,columns])
-    # if dt is simply a vector...
-    n.useable.rows <- if(is.null(dim(data))){
-        length(dt)
-    }else{
-        nrow(dt)
-    }
-    if(is.null(n.useable.rows) || n.useable.rows == 0){
-        return(0)
-    }else if(n.useable.rows > threshold){
-        return(n.useable.rows)
-    }else{
-        stop("Disclosure risk as there are fewer than ",
-             threshold, " observations.")
-    }
 }

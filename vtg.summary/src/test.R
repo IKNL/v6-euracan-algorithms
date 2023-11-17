@@ -50,22 +50,36 @@ print("federated result")
 print(federated_result)
 
 # check values
-stopifnot("global.nas" %in% names(federated_result))
-stopifnot(federated_result$global.means[1] == 5.698)
-stopifnot(abs(federated_result$global.means[2] == 2.009259) < 0.0001)
-stopifnot(abs(federated_result$global.means[3] == 12.590022) < 0.0001)
-stopifnot(abs(federated_result$global.variance[1] - 8.2150110) < 0.0001)
-stopifnot(federated_result$global.nas[1] == 0)
-stopifnot(federated_result$global.nas[2] == 244)
-stopifnot(federated_result$global.nas[3] == 78)
-stopifnot(federated_result$global.nas[4] == 0)
-stopifnot(federated_result$global.nas[1] + federated_result$global.lengths[1] == 1000)
-stopifnot(federated_result$global.nas[2] + federated_result$global.lengths[2] == 1000)
-stopifnot(federated_result$global.nas[3] + federated_result$global.lengths[3] == 1000)
-stopifnot(federated_result$global.nas[4] + federated_result$global.lengths[4] == 1000)
-stopifnot(federated_result$global.useable.rows == 479)
+stopifnot("nan_count" %in% names(federated_result))
+stopifnot(federated_result$mean[1] == 5.698)
+stopifnot(abs(federated_result$mean[2] == 2.009259) < 0.0001)
+stopifnot(abs(federated_result$mean[3] == 12.590022) < 0.0001)
+stopifnot(abs(federated_result$variance[1] - 8.2150110) < 0.0001)
+stopifnot(federated_result$nan_count[1] == 0)
+stopifnot(federated_result$nan_count[2] == 244)
+stopifnot(federated_result$nan_count[3] == 78)
+stopifnot(federated_result$nan_count[4] == 0)
+stopifnot(federated_result$nan_count[1] + federated_result$length[1] == 1000)
+stopifnot(federated_result$nan_count[2] + federated_result$length[2] == 1000)
+stopifnot(federated_result$nan_count[3] + federated_result$length[3] == 1000)
+stopifnot(federated_result$nan_count[4] + federated_result$length[4] == 1000)
+stopifnot(federated_result$complete_rows == 479)
 # stopifnot(abs(federate_result$nod))
 
+# try to run with a single column
+# columns=c("A")
+# federated_result <- vtg.summary::dsummary(
+#   client,
+#   columns,
+#   threshold=threshold,
+#   types=types,
+#   # organizations_to_include=organizations_to_include,
+# )
+# print(federated_result)
+# stopifnot(federated_result$mean[1] == 5.698)
+# stopifnot(federated_result$nan_count[1] == 0)
+# stopifnot(federated_result$nan_count[1] + federated_result$length[1] == 1000)
+# stopifnot(federated_result$complete_rows == 1000)
 
 # # set different threshold that should fail
 # threshold = 500L
