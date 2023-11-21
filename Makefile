@@ -10,7 +10,10 @@ echo:
 	@echo ""
 
 chisq:
-	make docker IMAGE=starter/vtg.chisq
+	make docker IMAGE=starter/vtg.chisq PKG_NAME=vtg.chisq
+
+survfit:
+	make docker IMAGE=starter/vtg.survfit PKG_NAME=vtg.survfit
 
 build: install-deps document
 	@echo "*** Building \"$(PKG_NAME)\" ***"
