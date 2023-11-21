@@ -18,13 +18,7 @@
 #' range and number of rows with non-empty and empty values.
 #'
 #' @TODO check if works with single column
-RPC_summary <- function(data, columns, threshold = 5L, types = NULL){
-
-  # Assign types
-  if (!is.null(types)) {
-    data <- vtg.summary::assign_types(data, types)
-  }
-
+RPC_summary <- function(data, columns, threshold = 5L, types = NULL) {
   # check if all requested columns are in the data. If not, return error
   columns <- unique(columns)
   columns_present <- get_columns_in_data(data, columns)
@@ -32,6 +26,11 @@ RPC_summary <- function(data, columns, threshold = 5L, types = NULL){
     msg <- "Not all columns are present in the data"
     vtg::log$error(msg)
     return(list("error" = msg))
+  }
+
+  # Assign types
+  if (!is.null(types)) {
+    data <- vtg.summary::assign_types(data, types)
   }
 
   # check if all columns are either numeric or factors. If not, return error

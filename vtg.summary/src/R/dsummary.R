@@ -18,9 +18,8 @@
 #' `range` a list of ranges per column,
 #' `mean` a vector of means per column,
 #' `variance` a vector of variance per column,
-#' `node.specific.useable.rows` the node specific useable rows if the entire
-#' data were used without missing values,
-#' `global.useable.rows` is an aggregation of the node.specific.useable.rows.
+#' `complete_rows_per_node` the number of complete rows per node,
+#' `complete_rows` is the sum of the complete rows per node.
 #'
 #' @author Hasan Alradhi
 #' @author Matteo Cellamare
@@ -86,7 +85,7 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
 
   # Compute global statistics from summary per node
   vtg::log$info("Aggregating node specific statistics...")
-  summary = combine_node_statistics(summary_per_node, columns)
+  summary <- combine_node_statistics(summary_per_node, columns)
 
   # now that we have the global mean, we can compute the variance
   vtg::log$info("Calculating variance per node...")
@@ -98,12 +97,10 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
   )
 
   vtg::log$info("Aggregating squared deviance...")
-  global_variance <- vtg.summary::comb_sums(variance_per_node, columns)
+  sum_global_variance <- sum_node_variances(columns, variance_per_node)
 
   vtg::log$info("Calculating global variance...")
-  summary[["variance"]] <- vtg.summary::glob_var(
-    global_variance, summary[["length"]], columns
-  )
+  summary[["variance"]] <- sum_global_variance / (summary[["length"]] - 1)
 
   vtg::log$info("Calculating global standard deviation")
   summary[["sd"]] <- sapply(summary[["variance"]], sqrt)
@@ -111,38 +108,58 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
   return(summary)
 }
 
+sum_node_variances <- function(columns, variance_per_node) {
+  sum_global_variance <- vector("list", length(columns))
+  for (column in columns) {
+    variance_per_column <- lapply(variance_per_node, function(variance) {
+      # Ignore NAs as they would cause sum to be NA as well
+      if(!is.na(variance[column])) {
+        variance[[column]]
+      }
+    })
+    variance_per_column <-  Reduce(c, variance_per_column)
+    if (all(is.na(variance_per_column))) {
+      sum_global_variance[[column]] <- NaN
+    } else {
+      sum_global_variance[[column]] <- Reduce("+", variance_per_column)
+    }
+  }
+  sum_global_variance <- Reduce("c", sum_global_variance)
+  names(sum_global_variance) <- columns
+  return(sum_global_variance)
+}
+
 combine_node_statistics <- function(summary_per_node, columns) {
   ###########   count NAs   ###############
   vtg::log$info("Aggregating length of missing data...")
-  nan_count_per_node <- lapply(summary_per_node, function(results){
+  nan_count_per_node <- lapply(summary_per_node, function(results) {
     results[["nan_count"]]
   })
   global_nan_count <- Reduce(`+`, nan_count_per_node)
 
   ###########   column length   ###############
   vtg::log$info("Aggregating node specific data lengths...")
-  col_length_per_node <- lapply(summary_per_node, function(results){
+  col_length_per_node <- lapply(summary_per_node, function(results) {
     results[["column_lengths"]]
   })
-  global_column_length = Reduce("+", col_length_per_node)
+  global_column_length <- Reduce("+", col_length_per_node)
 
   ###########   sum   ###############
   vtg::log$info("Aggregating node specific sums...")
-  sums_per_node <- lapply(summary_per_node, function(results){
+  sums_per_node <- lapply(summary_per_node, function(results) {
     results[["column_sums"]]
   })
-  global_sums <- vtg.summary::comb_sums(sums_per_node, columns)
-  global_sums = Reduce("+", sums_per_node)
+  global_sums <- Reduce("+", sums_per_node)
 
   ###########   range   ###############
   vtg::log$info("Aggregating node specific ranges...")
-  ranges_per_node <- lapply(summary_per_node, function(results){
+  ranges_per_node <- lapply(summary_per_node, function(results) {
     results[["column_ranges"]]
   })
   global_ranges <- list()
   for (column in columns) {
     # combine ranges per column
-    combined_ranges <- lapply(ranges_per_node, function(node_range){
+    combined_ranges <- lapply(ranges_per_node, function(node_range) {
       node_range[[column]]
     })
     if (all(sapply(combined_ranges, class) == "table")) {
@@ -156,20 +173,20 @@ combine_node_statistics <- function(summary_per_node, columns) {
 
   ###########   complete rows   ###############
   vtg::log$info("Aggregating complete rows...")
-  complete_rows_per_node <- lapply(summary_per_node, function(results){
-      results[["complete_rows"]]
+  complete_rows_per_node <- lapply(summary_per_node, function(results) {
+    results[["complete_rows"]]
   })
   global_complete_rows <- Reduce("sum", complete_rows_per_node)
   # also return the complete rows per node
   # TODO incorporate the correct node IDs?!
   complete_rows_per_node <-
     data.frame("node" = seq_along(complete_rows_per_node),
-                "complete_rows" = Reduce("c", complete_rows_per_node),
-                row.names = NULL)
+               "complete_rows" = Reduce("c", complete_rows_per_node),
+               row.names = NULL)
 
   ###########   mean   ###############
   vtg::log$info("Computing global means...")
-  global_means = global_sums / global_column_length
+  global_means <- global_sums / global_column_length
 
   # return all
   return(

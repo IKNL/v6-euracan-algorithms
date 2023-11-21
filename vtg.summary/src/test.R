@@ -26,7 +26,7 @@ datasets <- list(d1, d2)
 # create client
 client <- vtg::MockClient$new(
   datasets = datasets,
-  pkgname = 'vtg.summary'
+  pkgname = "vtg.summary"
 )
 
 # define organizations
