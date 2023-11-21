@@ -19,35 +19,13 @@
 #'
 #' @TODO check if works with single column
 RPC_summary <- function(data, columns, threshold = 5L, types = NULL) {
-  # check if all requested columns are in the data. If not, return error
-  columns <- unique(columns)
-  columns_present <- get_columns_in_data(data, columns)
-  if (length(columns_present) != length(columns)) {
-    msg <- "Not all columns are present in the data"
-    vtg::log$error(msg)
-    return(list("error" = msg))
+
+  # execute checks that are common to all RPCs
+  data <- vtg.summary::common_checks_rpc(data, columns, types)
+  if ("error" %in% names(data)) {
+    # Return error message
+    return(data)
   }
-
-  # Assign types
-  if (!is.null(types)) {
-    data <- vtg.summary::assign_types(data, types)
-  }
-
-  # check if all columns are either numeric or factors. If not, return error
-  if (any(
-    !sapply(data[, columns], function(col) is.numeric(col) || is.factor(col))
-  )) {
-    return(wrong_column_type_message(data, columns))
-  }
-  factor_columns <- columns[sapply(data[, columns], is.factor)]
-
-  # keep only requested columns. Cast to data.frame to avoid issues with
-  # single column data.frames. Then, set the column names explicitly because
-  # those are lost when casting to data.frame for single column data.frames.
-  data <- as.data.frame(data[, columns])
-  names(data) <- columns
-
-  # TODO up to here the code should be the same as the other RPC's - extract
 
   # count number of NA's
   nan_count <- colSums(is.na(data))
@@ -68,6 +46,7 @@ RPC_summary <- function(data, columns, threshold = 5L, types = NULL) {
 
   # check if there are disclosure risks for factors in column ranges. If so,
   # return error
+  factor_columns <- columns[sapply(data[, columns], is.factor)]
   if (any(
     sapply(column_ranges[factor_columns], function(x) any(x < threshold))
   )) {
@@ -121,25 +100,9 @@ get_column_ranges <- function(data, columns) {
   return(col_ranges)
 }
 
-get_columns_in_data <- function(data, columns) {
-  return(columns[columns %in% names(data)])
-}
 
-wrong_column_type_message <- function(data, columns) {
-  # determine which columns are not numeric or factors and return error message
-  wrong_column_types <- Reduce(`c`, lapply(columns, function(col_name) {
-    if (!is.numeric(data[, col_name]) && !is.factor(data[, col_name])) {
-      return(col_name)
-    }
-  }))
-  wrong_column_types <- paste(wrong_column_types, collapse = ", ")
-  msg <- glue::glue(
-    "Wrong column type, the following columns are not numeric or factors:
-    {wrong_column_types}"
-  )
-  vtg::log$error(msg)
-  return(list("error" = msg))
-}
+
+
 
 disclosive_msg_col_length <- function(columns, column_lengths, threshold) {
   # determine which columns are disclosive and return error message for them

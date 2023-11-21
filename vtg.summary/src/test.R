@@ -2,9 +2,6 @@ rm(list = ls(all.names = TRUE))
 devtools::load_all("./vtg.summary/src")
 devtools::load_all("./vtg.preprocessing")
 
-# data <- read.csv("C:/Users/bbe2101.54580/data/vantage6/starter/DB.csv", header = TRUE, sep = ";")
-# print("data loaded")
-
 # create fake data. Three columns with random numbers, two columns with factors
 set.seed(123L);
 columns = c("A", "B", "C", "D", "E")
@@ -43,7 +40,7 @@ federated_result <- vtg.summary::dsummary(
   columns,
   threshold=threshold,
   types=types,
-  # organizations_to_include=organizations_to_include,
+  organizations_to_include=organizations_to_include,
 )
 
 print("federated result")
@@ -67,52 +64,68 @@ stopifnot(federated_result$complete_rows == 479)
 # stopifnot(abs(federate_result$nod))
 
 # try to run with a single column
-# columns=c("A")
-# federated_result <- vtg.summary::dsummary(
-#   client,
-#   columns,
-#   threshold=threshold,
-#   types=types,
-#   # organizations_to_include=organizations_to_include,
-# )
-# print(federated_result)
-# stopifnot(federated_result$mean[1] == 5.698)
-# stopifnot(federated_result$nan_count[1] == 0)
-# stopifnot(federated_result$nan_count[1] + federated_result$length[1] == 1000)
-# stopifnot(federated_result$complete_rows == 1000)
+columns=c("A")
+federated_result <- vtg.summary::dsummary(
+  client,
+  columns,
+  threshold=threshold,
+  types=types,
+  # organizations_to_include=organizations_to_include,
+)
+print(federated_result)
+stopifnot(federated_result$mean[1] == 5.698)
+stopifnot(federated_result$nan_count[1] == 0)
+stopifnot(federated_result$nan_count[1] + federated_result$length[1] == 1000)
+stopifnot(federated_result$complete_rows == 1000)
 
-# # set different threshold that should fail
-# threshold = 500L
-# federated_result <- vtg.summary::dsummary(
-#   client,
-#   columns,
-#   threshold=threshold,
-#   types=types,
-#   # organizations_to_include=organizations_to_include,
-# )
-# print("federated result")
-# print(federated_result)
-# stopifnot("error" %in% names(federated_result))
-# stopifnot(startsWith(federated_result$error,
-#                      "Disclosure risk, not enough observations in columns"))
+# set different threshold that should fail
+threshold = 500L
+columns = c("A", "B", "C", "D", "E")
+federated_result <- vtg.summary::dsummary(
+  client,
+  columns,
+  threshold=threshold,
+  types=types,
+  # organizations_to_include=organizations_to_include,
+)
+print("federated result")
+print(federated_result)
+stopifnot("error" %in% names(federated_result))
+stopifnot(startsWith(federated_result$error,
+                     "Disclosure risk, not enough observations in columns"))
 
 
-# # And yet another threshold, which should give a different error
-# threshold = 100L
-# federated_result <- vtg.summary::dsummary(
-#   client,
-#   columns,
-#   threshold=threshold,
-#   types=types,
-#   # organizations_to_include=organizations_to_include,
-# )
-# print("federated result")
-# print(federated_result)
-# stopifnot("error" %in% names(federated_result))
-# stopifnot(startsWith(
-#   federated_result$error,
-#   "Disclosure risk, not enough observations in some categories of factorial"
-# ))
+# And yet another threshold, which should give a different error
+threshold = 100L
+federated_result <- vtg.summary::dsummary(
+  client,
+  columns,
+  threshold=threshold,
+  types=types,
+  # organizations_to_include=organizations_to_include,
+)
+print("federated result")
+print(federated_result)
+stopifnot("error" %in% names(federated_result))
+stopifnot(startsWith(
+  federated_result$error,
+  "Disclosure risk, not enough observations in some categories of factorial"
+))
+
+# Check if wrong column gives error
+columns = c("non-existing")
+threshold = 5L
+federated_result <- vtg.summary::dsummary(
+  client,
+  columns,
+  threshold=threshold,
+  types=types,
+  # organizations_to_include=organizations_to_include,
+)
+print("federated result")
+print(federated_result)
+stopifnot("error" %in% names(federated_result))
+stopifnot(federated_result$error == "Not all columns are present in the data")
 
 
 

@@ -90,7 +90,7 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
   # now that we have the global mean, we can compute the variance
   vtg::log$info("Calculating variance per node...")
   variance_per_node <- client$call(
-    "variance",
+    "variance_sum",
     columns = columns,
     mean = summary[["mean"]],
     types = types
