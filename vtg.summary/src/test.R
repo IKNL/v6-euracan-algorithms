@@ -79,6 +79,18 @@ stopifnot(federated_result$nan_count[1] == 0)
 stopifnot(federated_result$nan_count[1] + federated_result$length[1] == 1000)
 stopifnot(federated_result$complete_rows == 1000)
 
+# check that subsetting works
+federated_result <- vtg.summary::dsummary(
+  client=client,
+  columns=columns,
+  threshold=threshold,
+  types=types,
+  organizations_to_include=organizations_to_include,
+  extend_data=FALSE,
+  subset_rules = data.frame(subset = c("A > 5"))
+)
+stopifnot(federated_result$length[1] == 534)
+
 # set different threshold that should fail
 threshold = 500L
 columns = c("A", "B", "C", "D", "E")
