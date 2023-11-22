@@ -10,10 +10,10 @@ echo:
 	@echo ""
 
 chisq:
-	make docker IMAGE=starter/vtg.chisq
+	make docker PKG_NAME=vtg.chisq
 
 summary:
-	make docker IMAGE=starter/vtg.summary
+	make docker PKG_NAME=vtg.summary
 
 build: install-deps document
 	@echo "*** Building \"$(PKG_NAME)\" ***"
@@ -33,14 +33,14 @@ uninstall:
 
 DESCRIPTION:
 	@echo "Generating \"DESCRIPTION\" from \"DESCRIPTION.tpl\""
-	@echo "vantage6-Comment:" > DESCRIPTION
-	@echo "    **************************************************" >> DESCRIPTION
-	@echo "    * This file was generated from DESCRIPTION.tpl   *" >> DESCRIPTION
-	@echo "    * Please don't modify it directly! Instead,      *" >> DESCRIPTION
-	@echo "    * modify DESCRIPTION.tpl and run the following   *" >> DESCRIPTION
-	@echo "    * command:                                       *" >> DESCRIPTION
-	@echo "    *   make DESCRIPTION                             *" >> DESCRIPTION
-	@echo "    **************************************************" >> DESCRIPTION
+	@echo "vantage6-Comment:" > ./${PKG_NAME}/src/DESCRIPTION
+	@echo "    **************************************************" >> ./${PKG_NAME}/src/DESCRIPTION
+	@echo "    * This file was generated from DESCRIPTION.tpl   *" >> ./${PKG_NAME}/src/DESCRIPTION
+	@echo "    * Please don't modify it directly! Instead,      *" >> ./${PKG_NAME}/src/DESCRIPTION
+	@echo "    * modify DESCRIPTION.tpl and run the following   *" >> ./${PKG_NAME}/src/DESCRIPTION
+	@echo "    * command:                                       *" >> ./${PKG_NAME}/src/DESCRIPTION
+	@echo "    *   make DESCRIPTION                             *" >> ./${PKG_NAME}/src/DESCRIPTION
+	@echo "    **************************************************" >> ./${PKG_NAME}/src/DESCRIPTION
 	@sed "s/{{PKG_NAME}}/${PKG_NAME}/g" ./${PKG_NAME}/src/DESCRIPTION.tpl >> ./${PKG_NAME}/src/DESCRIPTION
 
 document:
