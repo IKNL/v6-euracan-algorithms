@@ -26,6 +26,7 @@
 #' @author Frank Martin
 #' @author Bart van Beusekom
 #'
+#' @TODO add extending and subsetting data
 dsummary <- function(client, columns, threshold = 5L, types = NULL,
                      organizations_to_include = NULL) {
   # Create logger

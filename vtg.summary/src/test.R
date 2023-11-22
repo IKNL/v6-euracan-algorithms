@@ -27,7 +27,7 @@ client <- vtg::MockClient$new(
 )
 
 # define organizations
-organizations_to_include <- c(1,2)
+organizations_to_include <- c(1, 2)
 
 log <- lgr::get_logger("vtg/MockClient")$set_threshold("debug")
 log <- lgr::get_logger("vtg/Client")$set_threshold("debug")
@@ -36,11 +36,11 @@ threshold = 5L
 types=NULL
 
 federated_result <- vtg.summary::dsummary(
-  client,
-  columns,
+  client=client,
+  columns=columns,
   threshold=threshold,
   types=types,
-  organizations_to_include=organizations_to_include,
+  organizations_to_include=organizations_to_include
 )
 
 print("federated result")
@@ -61,7 +61,6 @@ stopifnot(federated_result$nan_count[2] + federated_result$length[2] == 1000)
 stopifnot(federated_result$nan_count[3] + federated_result$length[3] == 1000)
 stopifnot(federated_result$nan_count[4] + federated_result$length[4] == 1000)
 stopifnot(federated_result$complete_rows == 479)
-# stopifnot(abs(federate_result$nod))
 
 # try to run with a single column
 columns=c("A")
@@ -70,7 +69,7 @@ federated_result <- vtg.summary::dsummary(
   columns,
   threshold=threshold,
   types=types,
-  # organizations_to_include=organizations_to_include,
+  organizations_to_include=organizations_to_include
 )
 print(federated_result)
 stopifnot(federated_result$mean[1] == 5.698)
@@ -86,7 +85,7 @@ federated_result <- vtg.summary::dsummary(
   columns,
   threshold=threshold,
   types=types,
-  # organizations_to_include=organizations_to_include,
+  organizations_to_include=organizations_to_include
 )
 print("federated result")
 print(federated_result)
@@ -102,7 +101,7 @@ federated_result <- vtg.summary::dsummary(
   columns,
   threshold=threshold,
   types=types,
-  # organizations_to_include=organizations_to_include,
+  organizations_to_include=organizations_to_include
 )
 print("federated result")
 print(federated_result)
@@ -120,7 +119,7 @@ federated_result <- vtg.summary::dsummary(
   columns,
   threshold=threshold,
   types=types,
-  # organizations_to_include=organizations_to_include,
+  organizations_to_include=organizations_to_include
 )
 print("federated result")
 print(federated_result)

@@ -12,6 +12,9 @@ echo:
 chisq:
 	make docker IMAGE=starter/vtg.chisq
 
+summary:
+	make docker IMAGE=starter/vtg.summary
+
 build: install-deps document
 	@echo "*** Building \"$(PKG_NAME)\" ***"
 	@mkdir ../dist; cd ../dist; R CMD build ../src
