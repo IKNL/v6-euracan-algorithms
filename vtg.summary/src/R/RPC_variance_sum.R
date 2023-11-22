@@ -10,11 +10,23 @@
 #' @param mean This is calculated earlier in the algorithm, global mean
 #' of the combined datastation(s) (nodes).
 #' @param types containing the types to set to the columns
+#' @param subset_rules Rules to filter data with. Default is NULL.
+#' @param threshold Minimum count in any result before error message is returned
+#' @param extend_data Whether to extend the data with the `extend_data`
+#' function. Default is TRUE.
 #'
 #' @return Vector of squared deviance per column in the Data or NaN if the
 #' data is populated entirely by NA
 #'
-RPC_variance_sum <- function(data, columns, mean, types = NULL) {
+RPC_variance_sum <- function(data, columns, mean, types = NULL,
+                             subset_rules = NULL, threshold = 5L,
+                             extend_data = TRUE) {
+
+  # Data pre-processing specific to EURACAN
+  if (extend_data) {
+    data <- vtg.preprocessing::extend_data(data)
+  }
+  data <- vtg.preprocessing::subset_data(data, subset_rules, threshold)
 
   # execute checks that are common to all RPCs
   data <- vtg.summary::common_checks_rpc(data, columns, types)

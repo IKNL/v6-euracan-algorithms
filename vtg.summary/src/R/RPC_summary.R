@@ -13,12 +13,22 @@
 #' @param threshold Minimum count in any result before error message is returned
 #' because the result may be disclosive. Default is 5.
 #' @param types types of the columns
+#' @param subset_rules Rules to filter data with. Default is NULL.
+#' @param extend_data Whether to extend the data with the `extend_data`
+#' function. Default is TRUE.
 #'
 #' @return A list with the following results for each column: length, sum,
 #' range and number of rows with non-empty and empty values.
 #'
 #' @TODO check if works with single column
-RPC_summary <- function(data, columns, threshold = 5L, types = NULL) {
+RPC_summary <- function(data, columns, threshold = 5L, types = NULL,
+                        subset_rules = NULL, extend_data = TRUE) {
+
+  # Data pre-processing specific to EURACAN
+  if (extend_data) {
+    data <- vtg.preprocessing::extend_data(data)
+  }
+  data <- vtg.preprocessing::subset_data(data, subset_rules, threshold)
 
   # execute checks that are common to all RPCs
   data <- vtg.summary::common_checks_rpc(data, columns, types)

@@ -9,6 +9,9 @@
 #' because the result may be disclosive. Default is 5.
 #' @param types types to subset data with.
 #' @param organizations_to_include organizations to include in the computation.
+#' @param subset_rules Rules to filter data with. Default is NULL.
+#' @param extend_data Whether to extend the data with the `extend_data`
+#' function. Default is TRUE.
 #'
 #' @return a list of combined summary statistics aggregated about all
 #' datastation(s) in the study. It will return  a list containing the
@@ -28,7 +31,8 @@
 #'
 #' @TODO add extending and subsetting data
 dsummary <- function(client, columns, threshold = 5L, types = NULL,
-                     organizations_to_include = NULL) {
+                     organizations_to_include = NULL, subset_rules = NULL,
+                     extend_data = TRUE) {
   # Create logger
   vtg::log$set_threshold("debug")
 
@@ -50,7 +54,9 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
       columns = columns,
       threshold = threshold,
       types = types,
-      organizations_to_include = organizations_to_include
+      organizations_to_include = organizations_to_include,
+      subset_rules = subset_rules,
+      extend_data = extend_data
     )
     return(result)
   }
@@ -73,7 +79,9 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
     "summary",
     columns = columns,
     threshold = threshold,
-    types = types
+    types = types,
+    subset_rules = subset_rules,
+    extend_data = extend_data
   )
 
   # catch errors for nodes
@@ -94,7 +102,10 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
     "variance_sum",
     columns = columns,
     mean = summary[["mean"]],
-    types = types
+    types = types,
+    subset_rules = subset_rules,
+    threshold = threshold,
+    extend_data = extend_data
   )
 
   vtg::log$info("Aggregating squared deviance...")
