@@ -10,7 +10,7 @@
 #' @param types types to subset data with.
 #' @param organizations_to_include organizations to include in the computation.
 #' @param subset_rules Rules to filter data with. Default is NULL.
-#' @param extend_data Whether to extend the data with the `extend_data`
+#' @param is_extend_data Whether to extend the data with the `is_extend_data`
 #' function. Default is TRUE.
 #'
 #' @return a list of combined summary statistics aggregated about all
@@ -32,7 +32,7 @@
 #' @TODO add extending and subsetting data
 dsummary <- function(client, columns, threshold = 5L, types = NULL,
                      organizations_to_include = NULL, subset_rules = NULL,
-                     extend_data = TRUE) {
+                     is_extend_data = TRUE) {
   # Create logger
   vtg::log$set_threshold("debug")
 
@@ -56,7 +56,7 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
       types = types,
       organizations_to_include = organizations_to_include,
       subset_rules = subset_rules,
-      extend_data = extend_data
+      is_extend_data = is_extend_data
     )
     return(result)
   }
@@ -81,7 +81,7 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
     threshold = threshold,
     types = types,
     subset_rules = subset_rules,
-    extend_data = extend_data
+    is_extend_data = is_extend_data
   )
 
   # catch errors for nodes
@@ -105,7 +105,7 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
     types = types,
     subset_rules = subset_rules,
     threshold = threshold,
-    extend_data = extend_data
+    is_extend_data = is_extend_data
   )
 
   vtg::log$info("Aggregating squared deviance...")

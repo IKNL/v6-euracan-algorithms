@@ -41,7 +41,7 @@ federated_result <- vtg.summary::dsummary(
   threshold=threshold,
   types=types,
   organizations_to_include=organizations_to_include,
-  extend_data=FALSE
+  is_extend_data=FALSE
 )
 
 print("federated result")
@@ -71,7 +71,7 @@ federated_result <- vtg.summary::dsummary(
   threshold=threshold,
   types=types,
   organizations_to_include=organizations_to_include,
-  extend_data=FALSE
+  is_extend_data=FALSE
 )
 print(federated_result)
 stopifnot(federated_result$mean[1] == 5.698)
@@ -86,7 +86,7 @@ federated_result <- vtg.summary::dsummary(
   threshold=threshold,
   types=types,
   organizations_to_include=organizations_to_include,
-  extend_data=FALSE,
+  is_extend_data=FALSE,
   subset_rules = data.frame(subset = c("A > 5"))
 )
 stopifnot(federated_result$length[1] == 534)
@@ -100,7 +100,7 @@ federated_result <- vtg.summary::dsummary(
   threshold=threshold,
   types=types,
   organizations_to_include=organizations_to_include,
-  extend_data=FALSE
+  is_extend_data=FALSE
 )
 print("federated result")
 print(federated_result)
@@ -117,7 +117,7 @@ federated_result <- vtg.summary::dsummary(
   threshold=threshold,
   types=types,
   organizations_to_include=organizations_to_include,
-  extend_data=FALSE
+  is_extend_data=FALSE
 )
 print("federated result")
 print(federated_result)
@@ -136,7 +136,7 @@ federated_result <- vtg.summary::dsummary(
   threshold=threshold,
   types=types,
   organizations_to_include=organizations_to_include,
-  extend_data=FALSE
+  is_extend_data=FALSE
 )
 print("federated result")
 print(federated_result)
