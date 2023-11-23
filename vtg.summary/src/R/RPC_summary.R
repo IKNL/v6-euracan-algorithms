@@ -23,7 +23,7 @@
 #' @TODO check if works with single column
 RPC_summary <- function(data, columns, threshold = 5L, types = NULL,
                         subset_rules = NULL, extend_data = TRUE) {
-
+  # TODO if preprocessing active, logs of RPC functions are not printed. Why?
   # Data pre-processing specific to EURACAN
   if (extend_data) {
     data <- vtg.preprocessing::extend_data(data)
@@ -98,15 +98,23 @@ get_column_sums <- function(data, columns) {
 }
 
 get_column_ranges <- function(data, columns) {
-  # compute range per column. If column is a factor, return a table of values
-  col_ranges <- lapply(columns, function(col_name) {
-    if (is.factor(data[, col_name])) {
-      return(table(data[, col_name]))
-    } else if (is.numeric(data[, col_name])) {
-      return(range(data[, col_name], na.rm = TRUE))
-    }
-  })
-  names(col_ranges) <- columns
+  factor_columns <- columns[sapply(data[, columns], is.factor)]
+  numeric_columns <- columns[sapply(data[, columns], is.numeric)]
+
+  # numeric summary
+  row_names <- c("min", "Q1", "median", "mean", "Q3", "max", "num_na")
+  summary_numeric <- do.call(cbind, lapply(data[,numeric_columns], summary))
+  rownames(summary_numeric) <- row_names
+
+  # factorial summary - omit NAs to not make that a separate category
+  summary_factors <- sapply(na.omit(data[,factor_columns]), summary)
+
+  # get range per column from summary
+  col_ranges <- summary_factors
+  for (col in numeric_columns) {
+    col_ranges[[col]] <- c(summary_numeric["min", col],
+                           summary_numeric["max", col])
+  }
   return(col_ranges)
 }
 
