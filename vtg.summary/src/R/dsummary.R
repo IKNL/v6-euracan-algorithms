@@ -174,7 +174,7 @@ combine_node_statistics <- function(summary_per_node, columns) {
     combined_ranges <- lapply(ranges_per_node, function(node_range) {
       node_range[[column]]
     })
-    if (all(sapply(combined_ranges, class) == "table")) {
+    if (all(sapply(combined_ranges, class, simplify = FALSE) == "table")) {
       # column is a factor, so sum the occurrences of each value
       global_ranges[[column]] <- Reduce("+", combined_ranges)
     } else {

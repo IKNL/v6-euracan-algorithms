@@ -23,6 +23,7 @@
 #' @TODO check if works with single column
 RPC_summary <- function(data, columns, threshold = 5L, types = NULL,
                         subset_rules = NULL, is_extend_data = TRUE) {
+  vtg::log$set_threshold("debug")
   # TODO if preprocessing active, logs of RPC functions are not printed. Why?
   # Data pre-processing specific to EURACAN
   if (is_extend_data) {
@@ -31,6 +32,7 @@ RPC_summary <- function(data, columns, threshold = 5L, types = NULL,
   data <- vtg.preprocessing::subset_data(data, subset_rules, threshold)
 
   # execute checks that are common to all RPCs
+  vtg::log$debug("Checking data...")
   data <- vtg.summary::common_checks_rpc(data, columns, types)
   if ("error" %in% names(data)) {
     # Return error message
@@ -38,24 +40,30 @@ RPC_summary <- function(data, columns, threshold = 5L, types = NULL,
   }
 
   # count number of NA's
+  vtg::log$debug("Counting number of NA's...")
   nan_count <- colSums(is.na(data))
 
   # get column length
+  vtg::log$debug("Counting column lengths...")
   column_lengths <- colSums(!is.na(data))
 
   # check if there are disclosure risks in column lengths. If so, return error
+  vtg::log$debug("Checking diclosure risk in column lengths...")
   if (any(column_lengths < threshold)) {
     return(disclosive_msg_col_length(columns, column_lengths, threshold))
   }
 
   # compute sum
+  vtg::log$debug("Computing column sums...")
   column_sums <- get_column_sums(data, columns)
 
   # compute data range
+  vtg::log$debug("Computing column ranges...")
   column_ranges <- get_column_ranges(data, columns)
 
   # check if there are disclosure risks for factors in column ranges. If so,
   # return error
+  vtg::log$debug("Checking disclosure risk in column ranges...")
   factor_columns <- columns[sapply(data[, columns], is.factor)]
   if (any(
     sapply(column_ranges[factor_columns], function(x) any(x < threshold))
@@ -64,6 +72,7 @@ RPC_summary <- function(data, columns, threshold = 5L, types = NULL,
   }
 
   # compute number of rows with values in all columns
+  vtg::log$debug("Counting number of rows with values in all columns...")
   complete_rows <- nrow(na.omit(data))
   if (complete_rows < threshold) {
     msg <- glue::glue(
@@ -73,6 +82,7 @@ RPC_summary <- function(data, columns, threshold = 5L, types = NULL,
     return(list("error" = msg))
   }
 
+  vtg::log$debug("Returning results...")
   return(
     list(
       "nan_count" = nan_count,
@@ -98,29 +108,32 @@ get_column_sums <- function(data, columns) {
 }
 
 get_column_ranges <- function(data, columns) {
-  factor_columns <- columns[sapply(data[, columns], is.factor)]
-  numeric_columns <- columns[sapply(data[, columns], is.numeric)]
+  factor_columns <- columns[sapply(as.data.frame(data[, columns]), is.factor)]
+  numeric_columns <- columns[sapply(as.data.frame(data[, columns]), is.numeric)]
 
   # numeric summary
-  row_names <- c("min", "Q1", "median", "mean", "Q3", "max", "num_na")
-  summary_numeric <- do.call(cbind, lapply(data[,numeric_columns], summary))
-  rownames(summary_numeric) <- row_names
+  summary_numeric <- NULL
+  if (length(numeric_columns) > 0) {
+    summary_numeric <- do.call(cbind, lapply(data[, numeric_columns], summary))
+  }
 
   # factorial summary - omit NAs to not make that a separate category
-  summary_factors <- sapply(na.omit(data[,factor_columns]), summary)
+  summary_factors <- NULL
+  if (length(factor_columns) > 0) {
+    summary_factors <- sapply(
+      as.data.frame(na.omit(data[, factor_columns])), summary, simplify = FALSE
+    )
+    names(summary_factors) <- factor_columns
+  }
 
   # get range per column from summary
   col_ranges <- summary_factors
   for (col in numeric_columns) {
-    col_ranges[[col]] <- c(summary_numeric["min", col],
-                           summary_numeric["max", col])
+    col_ranges[[col]] <- c(summary_numeric["Min.", col],
+                           summary_numeric["Max.", col])
   }
   return(col_ranges)
 }
-
-
-
-
 
 disclosive_msg_col_length <- function(columns, column_lengths, threshold) {
   # determine which columns are disclosive and return error message for them
