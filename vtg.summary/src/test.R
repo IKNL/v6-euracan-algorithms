@@ -62,8 +62,9 @@ stopifnot(federated_result$nan_count[2] + federated_result$length[2] == 1000)
 stopifnot(federated_result$nan_count[3] + federated_result$length[3] == 1000)
 stopifnot(federated_result$nan_count[4] + federated_result$length[4] == 1000)
 stopifnot(federated_result$complete_rows == 479)
+awef
 
-# try to run with a single column
+# try to run with a single numeric column
 columns=c("A")
 federated_result <- vtg.summary::dsummary(
   client,
@@ -79,7 +80,25 @@ stopifnot(federated_result$nan_count[1] == 0)
 stopifnot(federated_result$nan_count[1] + federated_result$length[1] == 1000)
 stopifnot(federated_result$complete_rows == 1000)
 
+# try to run with a single factorial column
+columns=c("E")
+federated_result <- vtg.summary::dsummary(
+  client,
+  columns,
+  threshold=threshold,
+  types=types,
+  organizations_to_include=organizations_to_include,
+  is_extend_data=FALSE
+)
+print(federated_result)
+stopifnot(!("error" %in% names(federated_result)))
+stopifnot(federated_result$mean[1] == NULL)
+stopifnot(federated_result$nan_count[1] == 327)
+stopifnot(federated_result$nan_count[1] + federated_result$length[1] == 1000)
+stopifnot(federated_result$complete_rows == 673)
+
 # check that subsetting works
+columns=c("A")
 federated_result <- vtg.summary::dsummary(
   client=client,
   columns=columns,
