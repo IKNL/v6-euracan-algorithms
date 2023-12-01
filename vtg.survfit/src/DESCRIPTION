@@ -11,22 +11,6 @@ Type: Package
 Version: 1.0.0
 Title: vtg.survfit
 Description: This package can be used with the vantage6 federated
-    learning infrastructure (see https://github.com/vantage6/vantage6).
-Encoding: UTF-8
-LazyData: true
-Imports:
-    glue,
-    vtg,
-    RCurl,
-    dplyr
-Remotes:
-    iknl/vtg
-RoxygenNote: 7.2.3
-Package: vtg.survfit
-Type: Package
-Version: 1.0.0
-Title: vtg.survfit
-Description: This package can be used with the vantage6 federated
     learning infrastructure (see https://github.com/IKNL/vantage6).
 Encoding: UTF-8
 LazyData: true

@@ -1,8 +1,11 @@
-RPC_at_risk <- function(data,subset_rules,master,stratum=NULL){
+RPC_at_risk <- function(data,subset_rules,master,vars,stratum=NULL){
 
     # Data pre-processing specific to EURACAN
     data <- vtg.preprocessing::extend_data(data)
     data <- vtg.preprocessing::subset_data(data, subset_rules)
+
+    # Select only the records that have non-missing values for the vars
+    data <- na.omit(data[, vars])
 
     time=master$time
     time2=master$time2
