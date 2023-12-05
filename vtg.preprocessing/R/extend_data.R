@@ -20,7 +20,6 @@ extend_data <- function(data) {
   print(ncol(temp.data))
 
   temp.data <- temp.data %>%
-    # mutate(time2 = time + sample(1:20, n(), replace = TRUE)) %>%
     # creazione dei site combinato
     # mutate(site = ifelse(!is.na(d11_siterare),d11_siterare ,d11_sitecomrar))
     # la differenza tra questi due codici, uno ha la label e l altro no. QUALE ? MEGLIO TENERE?
@@ -67,7 +66,7 @@ extend_data <- function(data) {
     mutate(deadOS = ifelse(h01_status %in% c(2, 3, 4), 1, 0)) %>%
     mutate(deadC = ifelse(h01_status == 2, 1, 0)) %>%
     # questa distanza ? calcolata in giorni per cui surv ? in giorni
-    mutate(surv = as.Date(h02_datelasfup) - as.Date(d01_diagdate)) %>%
+    mutate(surv = as.Date(h02_datelasfup, format="%Y-%m-%d") - as.Date(d01_diagdate, format="%Y-%m-%d")) %>%
     # eventi e survival per PFS _dalla data inizio trattamento a progressione o morte per tumore
 
     ##### Morto per tumore o progressione è 1 ( evento) LE MORTI PER ALTRE CAUSE sono 0 ( no evento) e devono essere censorizzate,

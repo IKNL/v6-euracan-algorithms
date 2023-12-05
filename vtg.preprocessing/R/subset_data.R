@@ -29,6 +29,7 @@
 #' @export
 subset_data <- function(data, subset_rules) {
 
+  result <- data
   if (is.null(subset_rules)) {
     print("No subset rules are given.")
     return(result)
@@ -39,7 +40,6 @@ subset_data <- function(data, subset_rules) {
 
   require(dplyr)
 
-  result <- data
   for (n_rule in seq_len(nrow(subset_rules))) {
     query <- subset_rules[n_rule, "subset"]
     result <- result %>% filter(!!rlang::parse_expr(query))
@@ -48,7 +48,7 @@ subset_data <- function(data, subset_rules) {
   # subset rules are given and subsetted data is < N
   min_number_of_rows <- 5
   if (nrow(result) < min_number_of_rows) {
-    warning(paste("This subset contains less than", N, "rows and will not be
+    warning(paste("This subset contains less than", min_number_of_rows, "rows and will not be
     returned for privacy preserving reasons."))
     result <- NULL
   }
