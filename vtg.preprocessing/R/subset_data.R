@@ -48,9 +48,8 @@ subset_data <- function(data, subset_rules) {
   # subset rules are given and subsetted data is < N
   threshold <- get_threshold()
   if (nrow(result) < threshold) {
-    warning(paste("This subset contains less than", threshold, "rows and will
-    not be returned for privacy preserving reasons."))
-    result <- NULL
+    error_msg <- glue::glue("Subset contains less than {threshold} rows.")
+    return(stop(error_msg))
   }
 
   print("Number of rows after subset_data:")
