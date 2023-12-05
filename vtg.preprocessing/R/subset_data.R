@@ -27,11 +27,11 @@
 #' names) if the subset of data has less than N rows.
 #'
 #' @export
-subset_data <- function(data, subset_rules) {
+subset_data <- function(data, subset_rules, threshold = 5L) {
 
   if (is.null(subset_rules)) {
     print("No subset rules are given.")
-    return(result)
+    return(data)
   }
 
   print("Number of rows before subset_data:")
@@ -46,10 +46,9 @@ subset_data <- function(data, subset_rules) {
   }
 
   # subset rules are given and subsetted data is < N
-  min_number_of_rows <- 5
-  if (nrow(result) < min_number_of_rows) {
-    warning(paste("This subset contains less than", N, "rows and will not be
-    returned for privacy preserving reasons."))
+  if (nrow(result) < threshold) {
+    warning(paste("This subset contains less than", threshold, "rows and will
+    not be returned for privacy preserving reasons."))
     result <- NULL
   }
 
