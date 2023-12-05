@@ -23,71 +23,51 @@
 #' @export
 #'
 dsurvfit <- function(client, formula, conf.int = 0.95, conf.type = "log", tmax = NA,
-                     timepoints = NULL, plotCI = F,
-                     organizations_to_include = NULL, subset_rules = NULL) {
-  vtg::log$debug("Initializing...")
-  lgr::threshold("debug")
+                     timepoints = NULL, plotCI = FALSE, organizations_to_include = NULL,
+                     subset_rules = NULL) {
 
-  # Update the client organizations according to those specified
-  if (!is.null(organizations_to_include)) {
-    vtg::log$info("Sending tasks only to specified organizations")
-    organizations_in_collaboration <- client$collaboration$organizations
-    # Clear the current list of organizations in the collaboration
-    # Will remove them for current task, not from actual collaboration
-    client$collaboration$organizations <- list()
-    # Reshape list when the organizations_to_include is not already a list
-    # Relevant when e.g., Python is used as client
-    if (!is.list(organizations_to_include)) {
-      organizations_to_use <- toString(organizations_to_include)
+  vtg::log$set_threshold("debug")
 
-      # Remove leading and trailing spaces as in python list
-      organizations_to_use <-
-        gsub(" ", "", organizations_to_use, fixed = TRUE)
+  vtg::log$debug("Initializing dsurvfit ...")
+  vtg::log$debug("  - formula: {formula}")
+  vtg::log$debug("  - conf.int: {conf.int}")
+  vtg::log$debug("  - conf.type: {conf.type}")
+  vtg::log$debug("  - tmax: {tmax}")
+  vtg::log$debug("  - timepoints: {timepoints}")
+  vtg::log$debug("  - plotCI: {plotCI}")
+  vtg::log$debug("  - organizations_to_include: {organizations_to_include}")
+  vtg::log$debug("  - subset_rules: {subset_rules}")
 
-      # Convert to list assuming it is comma separated
-      organizations_to_use <-
-        as.list(strsplit(organizations_to_use, ",")[[1]])
-    }
-    # Loop through the organization ids in the collaboration
-    for (organization in organizations_in_collaboration) {
-      # Include the organizations only when desired
-      if (organization$id %in% organizations_to_use) {
-        client$collaboration$organizations[[length(
-          client$collaboration$organizations
-        ) + 1]] <- organization
-      }
-    }
+  #
+  # Central part guard
+  # this will call itself without the `use.master.container` option
+  #
+  if (client$use.master.container) {
+    vtg::log$info("Running `dsurvfit` in central container")
+    result <- client$call("dsurvfit", formula = formula, conf.int = conf.int,
+                          conf.type = conf.type, timepoints = timepoints,
+                          plotCI = plotCI,
+                          organizations_to_include = organizations_to_include,
+                          subset_rules = subset_rules)
+    return(result)
   }
 
   # Parse a string to formula type. If it already is a formula this statement
-  # will do nothing. This is needed when Python (or other langauges) is used
+  # will do nothing. This is needed when Python (or other languages) is used
   # as a client.
-
   formula <- as.formula(formula)
 
-  # Run in a MASTER container. Note that this will call this method but then
-  # within a Docker container. The client used here below has set the
-  # property `use.master.container` set to `False`, therefore it will skip
-  # this block (else an infinite loop would occur).
+  # We set the organizations to include for the partial tasks, we do this after
+  # the central part guard, so that it is clear this is about the partial tasks
+  # as the central part should only be executed in one node (this is because
+  # of the `use.master.container` option)
+  client$setOrganizations(organizations_to_include)
 
-  if (client$use.master.container) {
-    vtg::log$debug(glue::glue("Running `dsurvfit` in master container using
-                                  image '{image.name}'.."))
-    result <- client$call(
-      "dsurvfit",
-      formula = formula,
-      conf.int = conf.int,
-      conf.type = conf.type,
-      timepoints = timepoints,
-      plotCI = plotCI,
-      organizations_to_include = organizations_to_include,
-      subset_rules = subset_rules
-    )
-
-    return(result)
-  }
-  # initialization variables
+  # The variables that we want to use in the analysis, these correspond to the
+  # column names in the data.frame
   vars <- all.vars(formula)
+
+
   KM <- function(vars, stratum = NULL) {
     master <-
       if (length(vars) > 3) {
@@ -140,8 +120,12 @@ dsurvfit <- function(client, formula, conf.int = 0.95, conf.type = "log", tmax =
     master <- vtg.survfit::serv_KM(nodes = node_KMsurv, master = master)
     return(master)
   }
+
+
   if (is.na(vars[3])) {
+
     master <- list(KM(vars))
+
   } else {
     vtg::log$info("RPC strata")
     node_strata <- client$call(
