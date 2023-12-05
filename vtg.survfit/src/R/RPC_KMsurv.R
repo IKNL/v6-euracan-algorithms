@@ -6,6 +6,7 @@ RPC_KMsurv=function(data,subset_rules,master,vars,stratum=NULL){
 
     # Select only the records that have non-missing values for the vars
     data <- na.omit(data[, vars])
+    print(paste0("final row count: ", nrow(data)))
 
     time=master$time
     time2=master$time2

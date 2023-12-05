@@ -59,6 +59,8 @@ docker-build:
 	  -t ${IMAGE}:${TAG} \
 	  -t ${HOST}/${IMAGE}:${TAG} \
 	  -t ${HOST}/${IMAGE}:latest \
+	  --progress=plain \
+	  --no-cache \
 	  .
 
 docker-push: docker-build

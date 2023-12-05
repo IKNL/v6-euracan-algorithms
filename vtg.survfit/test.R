@@ -1,6 +1,7 @@
 # Clear the environment completely
 rm(list = ls(all.names = TRUE))
-
+devtools::load_all("./vtg.preprocessing/src")
+devtools::load_all("./vtg.survfit/src")
 # This seems to be equivalent to "import x as y"
 library(namespace)
 tryCatch({
@@ -11,17 +12,23 @@ tryCatch({
 
 library(vtg.survfit)
 
-dataset=list(vtg.survfit::D1,vtg.survfit::D2,vtg.survfit::D3)
+d1 <- read.csv("C:\\data\\euracan-node-a.csv")
+dataset=list(d1, d1, d1)
 ###exapl
 
-formula = Surv(time, status) ~ trt
-#formula = Surv(time,time2, status) ~ trt
+# formula = Surv(time, status) ~ trt
+#formula = Surv(time,, status) ~ trt
+formula = 'Surv(surv, deadOS) ~ b04_sex'
 
 conf.int=0.95
 conf.type='log'
 timepoints=NULL
-plotCI=T
-tmax=100
+plotCI=F
+tmax=NA
+
+subset_rules <- data.frame(
+    subset=c("b04_sex!=999")
+)
 #timepoints = seq(0,1000,20)
 
 survfit.mock <- function(dataset,formula,conf.type,conf.int,timepoints,plotCI,tmax){
@@ -32,7 +39,8 @@ survfit.mock <- function(dataset,formula,conf.type,conf.int,timepoints,plotCI,tm
                                  conf.type = conf.type,
                                  timepoints = timepoints,
                                  plotCI = plotCI,
-                                 tmax=tmax)
+                                 tmax=tmax,
+                                 subset_rules = subset_rules)
     return(result)
 }
 
@@ -43,3 +51,13 @@ res <- survfit.mock(dataset = dataset,
              timepoints = timepoints,
              plotCI = plotCI,
              tmax=tmax)
+
+library(survival)
+vars <- all.vars(as.formula(formula))
+d2 <- vtg.preprocessing::extend_data(d1)
+d3 <- vtg.preprocessing::subset_data(d2,subset_rules)
+res_local <- survival::survfit(
+    formula = as.formula(formula),
+    data = na.omit(d3[,vars]),
+    conf.type = conf.type,
+)
