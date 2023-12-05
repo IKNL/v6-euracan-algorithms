@@ -50,7 +50,7 @@ wrong_column_type_message <- function(data, columns) {
   wrong_column_types <- paste(wrong_column_types, collapse = ", ")
   msg <- glue::glue(
     "Wrong column type, the following columns are not numeric or factors:
-    {wrong_column_types}"
+    {wrong_column_types}. Column types are: {sapply(data[, columns], class)}"
   )
   vtg::log$error(msg)
   return(list("error" = msg))

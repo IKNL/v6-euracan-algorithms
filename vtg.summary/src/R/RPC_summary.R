@@ -10,8 +10,6 @@
 #'
 #' @param data A data.frame supplied by the node
 #' @param columns List of column names to compute summary for.
-#' @param threshold Minimum count in any result before error message is returned
-#' because the result may be disclosive. Default is 5.
 #' @param types types of the columns
 #' @param subset_rules Rules to filter data with. Default is NULL.
 #' @param is_extend_data Whether to extend the data with the `is_extend_data`
@@ -21,8 +19,8 @@
 #' range and number of rows with non-empty and empty values.
 #'
 #' @TODO check if works with single column
-RPC_summary <- function(data, columns, threshold = 5L, types = NULL,
-                        subset_rules = NULL, is_extend_data = TRUE) {
+RPC_summary <- function(data, columns, types = NULL, subset_rules = NULL,
+                        is_extend_data = TRUE) {
   vtg::log$set_threshold("debug")
   # TODO if preprocessing active, logs of RPC functions are not printed. Why?
   # Data pre-processing specific to EURACAN
@@ -48,6 +46,7 @@ RPC_summary <- function(data, columns, threshold = 5L, types = NULL,
   column_lengths <- colSums(!is.na(data))
 
   # check if there are disclosure risks in column lengths. If so, return error
+  threshold <- get_threshold()
   vtg::log$debug("Checking diclosure risk in column lengths...")
   if (any(column_lengths < threshold)) {
     return(disclosive_msg_col_length(columns, column_lengths, threshold))
@@ -166,4 +165,20 @@ disclosive_msg_factorial <- function(col_ranges, factorial_cols, threshold) {
   )
   vtg::log$error(msg)
   return(list("error" = msg))
+}
+
+get_threshold <- function() {
+  return(get_env_var("VTG_SUMMARY_THRESHOLD", 5L))
+}
+
+get_env_var <- function(var, default) {
+
+  value <- as.integer(Sys.getenv(var))
+
+  if (is.na(value)) {
+    vtg::log$warn("'", var, "' is not set, using default of ",
+                  default, ".")
+    return(default)
+  }
+
 }

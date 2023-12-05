@@ -11,7 +11,6 @@
 #' of the combined datastation(s) (nodes).
 #' @param types containing the types to set to the columns
 #' @param subset_rules Rules to filter data with. Default is NULL.
-#' @param threshold Minimum count in any result before error message is returned
 #' @param is_extend_data Whether to extend the data with the `is_extend_data`
 #' function. Default is TRUE.
 #'
@@ -19,10 +18,10 @@
 #' data is populated entirely by NA
 #'
 RPC_variance_sum <- function(data, columns, mean, types = NULL,
-                             subset_rules = NULL, threshold = 5L,
-                             is_extend_data = TRUE) {
+                             subset_rules = NULL, is_extend_data = TRUE) {
 
   # Data pre-processing specific to EURACAN
+  threshold <- get_threshold()
   if (is_extend_data) {
     data <- vtg.preprocessing::extend_data(data)
   }
@@ -46,4 +45,21 @@ RPC_variance_sum <- function(data, columns, mean, types = NULL,
     }
   }
   return(result)
+}
+
+# TODO below is a code duplication that is also in RPC_summary...
+get_threshold <- function() {
+  return(get_env_var("VTG_SUMMARY_THRESHOLD", 5L))
+}
+
+get_env_var <- function(var, default) {
+
+  value <- as.integer(Sys.getenv(var))
+
+  if (is.na(value)) {
+    vtg::log$warn("'", var, "' is not set, using default of ",
+                  default, ".")
+    return(default)
+  }
+
 }

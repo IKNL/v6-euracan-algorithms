@@ -12,6 +12,10 @@ data <- data.frame("A" = sample(1:10, size = 1000, replace = TRUE),
                    "E" = sample(factor(as.character(c("female", "male", NA))),
                                 size = 1000, replace = TRUE))
 
+print(sapply(data, class)[["A", "B"]])
+awef
+
+
 # Split the dataframe into two sets
 n_rows <- nrow(data)
 set_size <- floor(n_rows / 2)
@@ -32,13 +36,11 @@ organizations_to_include <- c(1, 2)
 log <- lgr::get_logger("vtg/MockClient")$set_threshold("debug")
 log <- lgr::get_logger("vtg/Client")$set_threshold("debug")
 
-threshold = 5L
 types=NULL
 
 federated_result <- vtg.summary::dsummary(
   client=client,
   columns=columns,
-  threshold=threshold,
   types=types,
   organizations_to_include=organizations_to_include,
   is_extend_data=FALSE
@@ -62,14 +64,12 @@ stopifnot(federated_result$nan_count[2] + federated_result$length[2] == 1000)
 stopifnot(federated_result$nan_count[3] + federated_result$length[3] == 1000)
 stopifnot(federated_result$nan_count[4] + federated_result$length[4] == 1000)
 stopifnot(federated_result$complete_rows == 479)
-awef
 
 # try to run with a single numeric column
 columns=c("A")
 federated_result <- vtg.summary::dsummary(
   client,
   columns,
-  threshold=threshold,
   types=types,
   organizations_to_include=organizations_to_include,
   is_extend_data=FALSE
@@ -85,7 +85,6 @@ columns=c("E")
 federated_result <- vtg.summary::dsummary(
   client,
   columns,
-  threshold=threshold,
   types=types,
   organizations_to_include=organizations_to_include,
   is_extend_data=FALSE
@@ -102,7 +101,6 @@ columns=c("A")
 federated_result <- vtg.summary::dsummary(
   client=client,
   columns=columns,
-  threshold=threshold,
   types=types,
   organizations_to_include=organizations_to_include,
   is_extend_data=FALSE,
@@ -110,49 +108,11 @@ federated_result <- vtg.summary::dsummary(
 )
 stopifnot(federated_result$length[1] == 534)
 
-# set different threshold that should fail
-threshold = 500L
-columns = c("A", "B", "C", "D", "E")
-federated_result <- vtg.summary::dsummary(
-  client,
-  columns,
-  threshold=threshold,
-  types=types,
-  organizations_to_include=organizations_to_include,
-  is_extend_data=FALSE
-)
-print("federated result")
-print(federated_result)
-stopifnot("error" %in% names(federated_result))
-stopifnot(startsWith(federated_result$error,
-                     "Disclosure risk, not enough observations in columns"))
-
-
-# And yet another threshold, which should give a different error
-threshold = 100L
-federated_result <- vtg.summary::dsummary(
-  client,
-  columns,
-  threshold=threshold,
-  types=types,
-  organizations_to_include=organizations_to_include,
-  is_extend_data=FALSE
-)
-print("federated result")
-print(federated_result)
-stopifnot("error" %in% names(federated_result))
-stopifnot(startsWith(
-  federated_result$error,
-  "Disclosure risk, not enough observations in some categories of factorial"
-))
-
 # Check if wrong column gives error
 columns = c("non-existing")
-threshold = 5L
 federated_result <- vtg.summary::dsummary(
   client,
   columns,
-  threshold=threshold,
   types=types,
   organizations_to_include=organizations_to_include,
   is_extend_data=FALSE

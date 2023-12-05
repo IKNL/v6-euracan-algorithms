@@ -5,8 +5,6 @@
 #'
 #' @param client vtg::Client instance provided by node.
 #' @param columns List of column names to compute the summary for.
-#' @param threshold Minimum count in any result before error message is returned
-#' because the result may be disclosive. Default is 5.
 #' @param types types to subset data with.
 #' @param organizations_to_include organizations to include in the computation.
 #' @param subset_rules Rules to filter data with. Default is NULL.
@@ -30,7 +28,7 @@
 #' @author Bart van Beusekom
 #'
 #' @TODO add extending and subsetting data
-dsummary <- function(client, columns, threshold = 5L, types = NULL,
+dsummary <- function(client, columns, types = NULL,
                      organizations_to_include = NULL, subset_rules = NULL,
                      is_extend_data = TRUE) {
   # Create logger
@@ -38,7 +36,6 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
 
   vtg::log$info("Initializing summary...")
   vtg::log$debug("columns: {columns}")
-  vtg::log$debug("threshold: {threshold}")
   vtg::log$debug("types: {types}")
   vtg::log$debug("organizations_to_include: {organizations_to_include}")
 
@@ -52,7 +49,6 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
     result <- client$call(
       "dsummary",
       columns = columns,
-      threshold = threshold,
       types = types,
       organizations_to_include = organizations_to_include,
       subset_rules = subset_rules,
@@ -78,7 +74,6 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
   summary_per_node <- client$call(
     "summary",
     columns = columns,
-    threshold = threshold,
     types = types,
     subset_rules = subset_rules,
     is_extend_data = is_extend_data
@@ -104,7 +99,6 @@ dsummary <- function(client, columns, threshold = 5L, types = NULL,
     mean = summary[["mean"]],
     types = types,
     subset_rules = subset_rules,
-    threshold = threshold,
     is_extend_data = is_extend_data
   )
 
