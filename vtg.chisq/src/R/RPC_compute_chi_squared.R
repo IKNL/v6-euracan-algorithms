@@ -12,7 +12,23 @@ RPC_compute_chi_squared <- function(data, subset_rules, columns,
 
   # Data pre-processing specific to EURACAN
   data <- vtg.preprocessing::extend_data(data)
-  data <- vtg.preprocessing::subset_data(data, subset_rules)
+
+  identity <- get_identity()
+  data <- tryCatch(
+    vtg.preprocessing::subset_data(data, subset_rules),
+    error = function(e) {
+      return(list(
+        error = glue::glue("Subsetting failed: {e}"),
+        node = identity$node_id,
+        organization = identity$organization_id
+      ))
+    }
+  )
+
+  if (!is.null(data$error)) {
+    vtg::log$error(data$error)
+    return(data)
+  }
 
   data <- na.omit(data[, columns])
   return(sum(abs(data - expected_values)^2 / expected_values))
