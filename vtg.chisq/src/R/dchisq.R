@@ -60,12 +60,9 @@ dchisq <- function(client, columns, probabilities = NULL,
 
   vtg::log$info("Results from `dimensions_and_totals` received.")
 
-  errors <- get_errors(dimensions_and_totals)
-  if (length(errors) > 0) {
-    return(list(
-      error = "One or more nodes reported an error.",
-      errors = errors
-    ))
+  errors <- vtg::collect_errors(dimensions_and_totals)
+  if (!is.null(errors)) {
+    return(errors)
   }
 
   # Construct the global dimensions from the virtual data set.
@@ -121,12 +118,9 @@ dchisq <- function(client, columns, probabilities = NULL,
   }
   vtg::log$info("Results from `compute_chi_squared` received.")
 
-  errors <- get_errors(node_chi_sq_statistic)
-  if (length(errors) > 0) {
-    return(list(
-      error = "One or more nodes reported an error.",
-      errors = errors
-    ))
+  errors <- vtg::collect_errors(node_chi_sq_statistic)
+  if (!is.null(errors)) {
+    return(errors)
   }
 
   # The local chi-squared statistic is computed, now we can compute the global
@@ -169,20 +163,3 @@ dchisq <- function(client, columns, probabilities = NULL,
   return(output)
 }
 
-get_errors <- function(results) {
-  vtg::log$debug("Checking for errors in result.")
-  # loop over results
-  errors <- c()
-
-  for (i in seq_along(results)) {
-    result <- results[[i]]
-    if (!is.null(result$error)) {
-      vtg::log$info("Error found in the subtasks")
-      vtg::log$debug(" - Node '{result$node}'")
-      vtg::log$debug(" - Org. '{result$organization}'")
-      vtg::log$debug(" - Error: '{result$error}'")
-      errors <- c(errors, list(result))
-    }
-  }
-  return(errors)
-}
