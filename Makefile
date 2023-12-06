@@ -68,7 +68,7 @@ docker-build:
 
 docker-push: docker-build
 	@if test "$(TAG)" = "dev"; then \
-		docker push ${HOST}/${IMAGE}:${TAG}
+		docker push ${HOST}/${IMAGE}:${TAG};\
 	else \
 		docker push ${HOST}/${IMAGE}:${TAG};\
 		docker push ${HOST}/${IMAGE}:latest;\
