@@ -27,7 +27,7 @@ RPC_summary <- function(data, columns, types = NULL, subset_rules = NULL,
   if (is_extend_data) {
     data <- vtg.preprocessing::extend_data(data)
   }
-  data <- vtg.preprocessing::subset_data(data, subset_rules, threshold)
+  data <- vtg.preprocessing::subset_data(data, subset_rules)
 
   # execute checks that are common to all RPCs
   vtg::log$debug("Checking data...")
