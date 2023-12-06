@@ -53,15 +53,23 @@ docker-build:
 	@echo "* Building image '${IMAGE}:${TAG}' "
 	@echo "************************************************************************"
 
-	docker build \
-	  -f ./docker/${PKG_NAME}.Dockerfile \
-	   --build-arg PKG_NAME=${PKG_NAME} \
-	  -t ${IMAGE}:${TAG} \
-	  -t ${HOST}/${IMAGE}:${TAG} \
-	  -t ${HOST}/${IMAGE}:latest \
-	  .
+	@if test "$(TAG)" = "dev"; then \
+		echo "Building development image";\
+		docker build \
+			-f ./docker/${PKG_NAME}.Dockerfile --build-arg PKG_NAME=${PKG_NAME} \
+			--build-arg TAG=${TAG} -t ${HOST}/${IMAGE}:${TAG} . ;\
+	else \
+		echo "Building production image";\
+		docker build \
+			-f ./docker/${PKG_NAME}.Dockerfile --build-arg PKG_NAME=${PKG_NAME} \
+			--build-arg TAG=${TAG} -t ${IMAGE}:${TAG} -t ${HOST}/${IMAGE}:${TAG} \
+			-t ${HOST}/${IMAGE}:${TAG} -t ${HOST}/${IMAGE}:latest . ;\
+	fi
 
 docker-push: docker-build
-	docker push ${HOST}/${IMAGE}:${TAG}
-	docker push ${HOST}/${IMAGE}:latest
-
+	@if test "$(TAG)" = "dev"; then \
+		docker push ${HOST}/${IMAGE}:${TAG}
+	else \
+		docker push ${HOST}/${IMAGE}:${TAG};\
+		docker push ${HOST}/${IMAGE}:latest;\
+	fi
