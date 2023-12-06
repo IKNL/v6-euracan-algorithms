@@ -16,7 +16,7 @@ RPC_compute_chi_squared <- function(data, subset_rules, columns,
 
   data <- tryCatch(
     vtg.preprocessing::subset_data(data, subset_rules),
-    error = function(e) return(vtg::error_format(e))
+    error = function(e) return(vtg::error_format(conditionMessage(e)))
   )
 
   if (!is.null(data$error)) {
