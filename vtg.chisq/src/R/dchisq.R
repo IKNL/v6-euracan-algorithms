@@ -89,7 +89,7 @@ dchisq <- function(client, columns, probabilities = NULL,
     msg <- "organizations_to_include and dimensions_and_totals must be of
             same length.. This should not be possible"
     vtg::log$error(msg)
-    return(list(error = msg))
+    return(vtg::error_format(error = msg))
   }
 
   # The computation of the X-squared statistic at each nodes only requires

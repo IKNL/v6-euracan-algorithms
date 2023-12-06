@@ -15,17 +15,10 @@ RPC_dimensions_and_totals <- function(data, subset_rules, columns) {
 
   # Data pre-processing specific to EURACAN
   data <- vtg.preprocessing::extend_data(data)
-  identity <- get_identity()
 
   data <- tryCatch(
     vtg.preprocessing::subset_data(data, subset_rules),
-    error = function(e) {
-      return(list(
-        error = glue::glue("Subsetting failed: {e}"),
-        node = identity$node_id,
-        organization = identity$organization_id
-      ))
-    }
+    error = function(e) return(vtg::error_format(e))
   )
 
   if (!is.null(data$error)) {
