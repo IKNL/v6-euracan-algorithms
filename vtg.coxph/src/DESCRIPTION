@@ -1,8 +1,11 @@
-Vantage-Comment:
-    ************************************************
-    * This file was generated from DESCRIPTION.tpl *
-    * Please don't modify it directly!             *
-    ************************************************
+vantage6-Comment:
+    **************************************************
+    * This file was generated from DESCRIPTION.tpl   *
+    * Please don't modify it directly! Instead,      *
+    * modify DESCRIPTION.tpl and run the following   *
+    * command:                                       *
+    *   make DESCRIPTION                             *
+    **************************************************
 Package: vtg.coxph
 Type: Package
 Version: 0.1.0
@@ -26,4 +29,6 @@ Imports:
     vtg
 Remotes:
     iknl/vtg
-RoxygenNote: 7.2.3
+RoxygenNote: 7.0.0
+
+

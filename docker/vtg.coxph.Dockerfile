@@ -8,9 +8,15 @@ FROM harbor2.vantage6.ai/base/custom-r-base
 ARG PKG_NAME='vtg.coxph'
 
 LABEL maintainer="Hasan Alradhi <h.alradhi@iknl.nl>"
+LABEL maintainer="Frank Martin <f.martin@iknl.nl>"
 
-# Install federated coxph package
-COPY ./models/coxph/src /usr/local/R/${PKG_NAME}/
+# Install common functions package
+COPY ./vtg.preprocessing/ /usr/local/R/vtg.preprocessing/
+RUN Rscript -e 'install.packages("/usr/local/R/vtg.preprocessing", \
+                                 repos = NULL, type = "source")'
+
+# Install federated chisq package
+COPY ./${PKG_NAME}/src /usr/local/R/${PKG_NAME}/
 
 WORKDIR /usr/local/R/${PKG_NAME}
 RUN Rscript -e 'library(devtools)' -e 'install_github("IKNL/vtg")'
