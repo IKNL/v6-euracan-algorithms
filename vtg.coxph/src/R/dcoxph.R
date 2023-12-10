@@ -57,8 +57,8 @@ dcoxph <- function(client, expl_vars, time_col, censor_col, types = NULL,
   # Ask all nodes to return their unique event times with counts
   vtg::log$info("Getting unique event times and counts")
   results <- client$call("get_unique_event_times_and_counts",
-                         subset_rules = subset_rules, time_col = time_col,
-                         censor_col = censor_col, types = types)
+                         expl_vars = expl_vars, subset_rules = subset_rules,
+                         time_col = time_col, censor_col = censor_col, types = types)
   vtg::log$info("Results from `get_unique_event_times_and_counts` received.")
 
   errors <- vtg::collect_errors(results)

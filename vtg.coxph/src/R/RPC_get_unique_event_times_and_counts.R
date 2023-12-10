@@ -6,7 +6,7 @@
 #'
 #' Return:
 #'   dataframe with columns time and Freq
-RPC_get_unique_event_times_and_counts <- function(df, subset_rules, time_col,
+RPC_get_unique_event_times_and_counts <- function(df, expl_vars, subset_rules, time_col,
                                                   censor_col, types = NULL) {
   # Data pre-processing specific to EURACAN
   df <- vtg.preprocessing::extend_data(df)
@@ -17,10 +17,12 @@ RPC_get_unique_event_times_and_counts <- function(df, subset_rules, time_col,
     }
   )
 
-  if (!is.null(data$error)) {
-    vtg::log$error(data$error)
-    return(data)
+  if (!is.null(df$error)) {
+    vtg::log$error(df$error)
+    return(df)
   }
+
+  df <- na.omit(df[, c(expl_vars, censor_col, time_col)])
 
   # Specify data types for the columns in the data
   if (!is.null(types)) df <- assign_types(df, types)

@@ -23,15 +23,18 @@ RPC_compute_summed_z <- function(df, subset_rules, expl_vars, time_col,
     }
   )
 
-  if (!is.null(data$error)) {
-    vtg::log$error(data$error)
-    return(data)
+  if (!is.null(df$error)) {
+    vtg::log$error(df$error)
+    return(df)
   }
+
+  df <- na.omit(df[, c(expl_vars, censor_col, time_col)])
 
   # Specify data types for the columns in the data
   if (!is.null(types)) df <- assign_types(df, types)
 
   data <- preprocess.data(df, expl_vars, censor_col, time_col)
+
 
   # Set condition to enable univariate Cox
   if (dim(data$Z)[2] > 1) {
@@ -39,6 +42,8 @@ RPC_compute_summed_z <- function(df, subset_rules, expl_vars, time_col,
   } else {
     cases_with_events <- as.matrix(data$Z[data$censor == 1])
   }
+
+  print(cases_with_events)
 
   # Since an item can only be in a single set of events, we're essentially
   # summing over all cases with events.

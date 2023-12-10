@@ -23,10 +23,12 @@ RPC_perform_iteration <- function(df, subset_rules, expl_vars, time_col,
     }
   )
 
-  if (!is.null(data$error)) {
-    vtg::log$error(data$error)
-    return(data)
+  if (!is.null(df$error)) {
+    vtg::log$error(df$error)
+    return(df)
   }
+
+  df <- na.omit(df[, c(expl_vars, censor_col, time_col)])
 
   if (!is.null(types)) df <- assign_types(df, types)
 
