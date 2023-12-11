@@ -43,8 +43,6 @@ RPC_compute_summed_z <- function(df, subset_rules, expl_vars, time_col,
     cases_with_events <- as.matrix(data$Z[data$censor == 1])
   }
 
-  print(cases_with_events)
-
   # Since an item can only be in a single set of events, we're essentially
   # summing over all cases with events.
   summed_zs <- colSums(cases_with_events)
