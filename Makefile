@@ -15,6 +15,9 @@ chisq:
 summary:
 	make docker PKG_NAME=vtg.summary
 
+coxph:
+	make docker PKG_NAME=vtg.coxph
+
 build: install-deps document
 	@echo "*** Building \"$(PKG_NAME)\" ***"
 	@mkdir ../dist; cd ../dist; R CMD build ../src
