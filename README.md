@@ -36,4 +36,5 @@ With `[ALGORITHM]` being the name of the algorithm:
 - `chisq`
 - `summary`
 - `survfit`
+- `coxph`
 

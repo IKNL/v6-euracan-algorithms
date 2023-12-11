@@ -10,9 +10,17 @@
 compute.combined.ties <- function(Ds) {
 
     # Merge the list of event times & counts into a single data frame
+    vtg::log$info("Merging tie-counts from all sites")
     for (k in 1:length(Ds)) {
         # This only works if the joined columns have different names
         site_name <- sprintf("site_%i", k)
+        vtg::log$info("Processing site {site_name}")
+        vtg::log$debug("Data:")
+        vtg::log$debug(Ds[[k]])
+        vtg::log$debug(typeof(Ds[[k]]))
+        vtg::log$debug(is.data.frame(Ds[[k]]))
+        vtg::log$debug("Column names before: {colnames(Ds[[k]])}")
+        vtg::log$debug("Column names after: {c('time', site_name)}")
         colnames(Ds[[k]]) <- c("time", site_name)
 
         if (k == 1) {

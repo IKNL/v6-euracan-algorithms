@@ -28,7 +28,10 @@ RPC_perform_iteration <- function(df, subset_rules, expl_vars, time_col,
     return(df)
   }
 
+  vtg::log$info("Rows before NA removal: {nrow(df)}")
   df <- na.omit(df[, c(expl_vars, censor_col, time_col)])
+  # TODO: we need to check if sufficient columns are left after NA removal
+  vtg::log$info("Rows after NA removal: {nrow(df)}")
 
   if (!is.null(types)) df <- assign_types(df, types)
 

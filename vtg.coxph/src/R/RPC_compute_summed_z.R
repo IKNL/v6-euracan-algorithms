@@ -28,7 +28,10 @@ RPC_compute_summed_z <- function(df, subset_rules, expl_vars, time_col,
     return(df)
   }
 
+  vtg::log$info("Rows before NA removal: {nrow(df)}")
   df <- na.omit(df[, c(expl_vars, censor_col, time_col)])
+  # TODO: we need to check if sufficient columns are left after NA removal
+  vtg::log$info("Rows after NA removal: {nrow(df)}")
 
   # Specify data types for the columns in the data
   if (!is.null(types)) df <- assign_types(df, types)
