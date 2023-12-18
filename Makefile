@@ -12,6 +12,9 @@ echo:
 chisq:
 	make docker PKG_NAME=vtg.chisq
 
+survfit:
+	make docker PKG_NAME=vtg.survfit
+
 summary:
 	make docker PKG_NAME=vtg.summary
 
