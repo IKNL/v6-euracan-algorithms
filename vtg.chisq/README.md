@@ -59,9 +59,14 @@ client.wait_for_results(my_task.get('id'))
 ```
 
 ## Disclosure settings
-- [ ] ...
+
+`VTG_CHISQ_THRESHOLD`
+Checks that the number of patients in the same group is at least the threshold. Default is set to 5.
+
+`VTG_CHISQ_MIN_PATIENT_THRESHOLD`
+The number of patients that should be present at the start of the analysis (after pre-processing) the default 10.
 
 ## TODO
-- [ ] TODO Missing values are ignored. Even when a single value is missing the whole row is removed. We should document this.
+- [ ] What happens with missing values?
 - [ ] ...
 

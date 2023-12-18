@@ -44,8 +44,6 @@ data <- do.call(rbind, data_central)
 col <- c("age", "combstage")
 central_result <- chisq.test(na.omit(data[, col]))
 
-
-
 #
 #   Federated Chisq test
 #
@@ -65,21 +63,27 @@ federated_result <- vtg.chisq::dchisq(
   probabilities = probs,
   organizations_to_include = organizations_to_include,
 #   subset_rules = data.frame(subset = c("age>30 & age<=70"))
-  subset_rules = NULL
+  subset_rules = data.frame(subset = c("combstage==988"))
 )
 
-#
-#   Compare results
-#
-federated_result$statistic == central_result$statistic
-federated_result$parameter == central_result$parameter
-federated_result$pval == central_result$p.value
+if (is.null(federated_result$error)) {
+  #
+  #   Compare results
+  #
+  federated_result$statistic == central_result$statistic
+  federated_result$parameter == central_result$parameter
+  federated_result$pval == central_result$p.value
 
-print(federated_result$statistic)
-print(central_result$statistic)
+  print(federated_result$statistic)
+  print(central_result$statistic)
 
-print(federated_result$parameter)
-print(central_result$parameter)
+  print(federated_result$parameter)
+  print(central_result$parameter)
 
-print(federated_result$pval)
-print(central_result$p.value)
+  print(federated_result$pval)
+  print(central_result$p.value)
+
+} else {
+  print(federated_result$error)
+  print(federated_result$errors)
+}

@@ -10,10 +10,16 @@ echo:
 	@echo ""
 
 chisq:
-	make docker IMAGE=starter/vtg.chisq PKG_NAME=vtg.chisq
+	make docker PKG_NAME=vtg.chisq
 
 survfit:
-	make docker IMAGE=starter/vtg.survfit PKG_NAME=vtg.survfit
+	make docker PKG_NAME=vtg.survfit
+
+summary:
+	make docker PKG_NAME=vtg.summary
+
+coxph:
+	make docker PKG_NAME=vtg.coxph
 
 build: install-deps document
 	@echo "*** Building \"$(PKG_NAME)\" ***"
@@ -33,14 +39,14 @@ uninstall:
 
 DESCRIPTION:
 	@echo "Generating \"DESCRIPTION\" from \"DESCRIPTION.tpl\""
-	@echo "vantage6-Comment:" > DESCRIPTION
-	@echo "    **************************************************" >> DESCRIPTION
-	@echo "    * This file was generated from DESCRIPTION.tpl   *" >> DESCRIPTION
-	@echo "    * Please don't modify it directly! Instead,      *" >> DESCRIPTION
-	@echo "    * modify DESCRIPTION.tpl and run the following   *" >> DESCRIPTION
-	@echo "    * command:                                       *" >> DESCRIPTION
-	@echo "    *   make DESCRIPTION                             *" >> DESCRIPTION
-	@echo "    **************************************************" >> DESCRIPTION
+	@echo "vantage6-Comment:" > ./${PKG_NAME}/src/DESCRIPTION
+	@echo "    **************************************************" >> ./${PKG_NAME}/src/DESCRIPTION
+	@echo "    * This file was generated from DESCRIPTION.tpl   *" >> ./${PKG_NAME}/src/DESCRIPTION
+	@echo "    * Please don't modify it directly! Instead,      *" >> ./${PKG_NAME}/src/DESCRIPTION
+	@echo "    * modify DESCRIPTION.tpl and run the following   *" >> ./${PKG_NAME}/src/DESCRIPTION
+	@echo "    * command:                                       *" >> ./${PKG_NAME}/src/DESCRIPTION
+	@echo "    *   make DESCRIPTION                             *" >> ./${PKG_NAME}/src/DESCRIPTION
+	@echo "    **************************************************" >> ./${PKG_NAME}/src/DESCRIPTION
 	@sed "s/{{PKG_NAME}}/${PKG_NAME}/g" ./${PKG_NAME}/src/DESCRIPTION.tpl >> ./${PKG_NAME}/src/DESCRIPTION
 
 document:
@@ -53,17 +59,23 @@ docker-build:
 	@echo "* Building image '${IMAGE}:${TAG}' "
 	@echo "************************************************************************"
 
-	docker build \
-	  -f ./docker/${PKG_NAME}.Dockerfile \
-	   --build-arg PKG_NAME=${PKG_NAME} \
-	  -t ${IMAGE}:${TAG} \
-	  -t ${HOST}/${IMAGE}:${TAG} \
-	  -t ${HOST}/${IMAGE}:latest \
-	  --progress=plain \
-	  --no-cache \
-	  .
+	@if test "$(TAG)" = "dev"; then \
+		echo "Building development image";\
+		docker build \
+			-f ./docker/${PKG_NAME}.Dockerfile --build-arg PKG_NAME=${PKG_NAME} \
+			--build-arg TAG=${TAG} -t ${HOST}/${IMAGE}:${TAG} . ;\
+	else \
+		echo "Building production image";\
+		docker build \
+			-f ./docker/${PKG_NAME}.Dockerfile --build-arg PKG_NAME=${PKG_NAME} \
+			--build-arg TAG=${TAG} -t ${IMAGE}:${TAG} -t ${HOST}/${IMAGE}:${TAG} \
+			-t ${HOST}/${IMAGE}:${TAG} -t ${HOST}/${IMAGE}:latest . ;\
+	fi
 
 docker-push: docker-build
-	docker push ${HOST}/${IMAGE}:${TAG}
-	docker push ${HOST}/${IMAGE}:latest
-
+	@if test "$(TAG)" = "dev"; then \
+		docker push ${HOST}/${IMAGE}:${TAG};\
+	else \
+		docker push ${HOST}/${IMAGE}:${TAG};\
+		docker push ${HOST}/${IMAGE}:latest;\
+	fi

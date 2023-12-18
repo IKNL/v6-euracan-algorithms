@@ -15,15 +15,23 @@ RPC_dimensions_and_totals <- function(data, subset_rules, columns) {
 
   # Data pre-processing specific to EURACAN
   data <- vtg.preprocessing::extend_data(data)
-  data <- vtg.preprocessing::subset_data(data, subset_rules)
+
+  data <- tryCatch(
+    vtg.preprocessing::subset_data(data, subset_rules),
+    error = function(e) return(vtg::error_format(conditionMessage(e)))
+  )
+
+  if (!is.null(data$error)) {
+    vtg::log$error(data$error)
+    return(data)
+  }
 
   # Number of observations in the dataset before removing NA's
   n_raw <- nrow(data)
   data_filtered <- na.omit(data[, columns])
   # Number of observations in the dataset after removing NA's
   n <- nrow(data_filtered)
-  vtg::log$info("Removed ", n_raw - n, " rows from the dataset. As they
-                contained NA's.")
+  vtg::log$info("Removed {n_raw - n} rows from the dataset. As they contained NA's.")
 
   # Disclosure risk checks
 #   if (!check_disclosure_risk(data)) {

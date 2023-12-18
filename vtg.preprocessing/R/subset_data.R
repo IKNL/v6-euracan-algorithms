@@ -32,7 +32,7 @@ subset_data <- function(data, subset_rules) {
   result <- data
   if (is.null(subset_rules)) {
     print("No subset rules are given.")
-    return(result)
+    return(data)
   }
 
   print("Number of rows before subset_data:")
@@ -46,15 +46,20 @@ subset_data <- function(data, subset_rules) {
   }
 
   # subset rules are given and subsetted data is < N
-  min_number_of_rows <- 5
-  if (nrow(result) < min_number_of_rows) {
-    warning(paste("This subset contains less than", min_number_of_rows, "rows and will not be
-    returned for privacy preserving reasons."))
-    result <- NULL
+  threshold <- get_threshold()
+  print(glue::glue("Threshold is {threshold}"))
+  if (nrow(result) < threshold) {
+    error_msg <- glue::glue("Subset contains less than {threshold} rows.")
+    stop(error_msg)
   }
 
   print("Number of rows after subset_data:")
   print(nrow(result))
 
   return(result)
+}
+
+get_threshold <- function() {
+  threshold <- Sys.getenv("VTG_PREPROCESS_MIN_RECORDS_THRESHOLD", unset = 5)
+  return(as.integer(threshold))
 }

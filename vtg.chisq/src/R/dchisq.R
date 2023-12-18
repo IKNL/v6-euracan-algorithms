@@ -60,19 +60,12 @@ dchisq <- function(client, columns, probabilities = NULL,
 
   vtg::log$info("Results from `dimensions_and_totals` received.")
 
-  # Validate that all nodes reported their dimensions and totals
-  error <- FALSE
-  for (res in dimensions_and_totals ) {
-    if (!is.null(res$error)) {
-      vtg::log$error("Node reported an error: {res$error}")
-      error <- TRUE
-    }
-  }
-  if (error) {
-    return(list(error = "One or more nodes reported an error."))
+  errors <- vtg::collect_errors(dimensions_and_totals)
+  if (!is.null(errors)) {
+    return(errors)
   }
 
-  # Construct the global dimensions from the virtual data set
+  # Construct the global dimensions from the virtual data set.
   global_dimensions <- vtg.chisq::global_dimensions(dimensions_and_totals)
 
   # In the case of a single vector we need to do some other things than in
@@ -89,9 +82,11 @@ dchisq <- function(client, columns, probabilities = NULL,
   globals <- vtg.chisq::expectation(dimensions_and_totals, global_dimensions,
                                     probabilities, is_col)
 
-  if(!length(organizations_to_include) == length(dimensions_and_totals)){
-    stop("organizations_to_include and dimensions_and_totals must be of
-         same length.. This should not be possible")
+  if (!length(organizations_to_include) == length(dimensions_and_totals)) {
+    msg <- "organizations_to_include and dimensions_and_totals must be of
+            same length.. This should not be possible"
+    vtg::log$error(msg)
+    return(vtg::error_format(error = msg))
   }
 
   # The computation of the X-squared statistic at each nodes only requires
@@ -122,6 +117,11 @@ dchisq <- function(client, columns, probabilities = NULL,
     )
   }
   vtg::log$info("Results from `compute_chi_squared` received.")
+
+  errors <- vtg::collect_errors(node_chi_sq_statistic)
+  if (!is.null(errors)) {
+    return(errors)
+  }
 
   # The local chi-squared statistic is computed, now we can compute the global
   # chi-squared statistic by summing the local chi-squared statistics.
@@ -162,3 +162,4 @@ dchisq <- function(client, columns, probabilities = NULL,
   vtg::log$info("dchisq completed.")
   return(output)
 }
+
