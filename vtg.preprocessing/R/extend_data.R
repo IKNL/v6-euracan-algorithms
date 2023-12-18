@@ -67,7 +67,7 @@ extend_data <- function(data) {
     mutate(deadOS = ifelse(h01_status %in% c(2, 3, 4), 1, 0)) %>%
     mutate(deadC = ifelse(h01_status == 2, 1, 0)) %>%
     # questa distanza ? calcolata in giorni per cui surv ? in giorni
-    mutate(surv = as.Date(h02_datelasfup) - as.Date(d01_diagdate)) %>%
+    mutate(surv = as.integer(as.Date(h02_datelasfup) - as.Date(d01_diagdate))) %>%
     # eventi e survival per PFS _dalla data inizio trattamento a progressione o morte per tumore
 
     ##### Morto per tumore o progressione è 1 ( evento) LE MORTI PER ALTRE CAUSE sono 0 ( no evento) e devono essere censorizzate,
