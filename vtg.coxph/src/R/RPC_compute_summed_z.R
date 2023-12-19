@@ -11,6 +11,9 @@
 #'
 #' Return:
 #'   numeric vector with sums and named index with covariates.
+#' 
+#' UPDATE : Added one-hot-encoding for factor data
+#' 
 RPC_compute_summed_z <- function(df, subset_rules, expl_vars, time_col,
                                  censor_col, types = NULL) {
 
