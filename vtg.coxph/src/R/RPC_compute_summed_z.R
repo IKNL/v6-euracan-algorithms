@@ -65,24 +65,24 @@ RPC_compute_summed_z <- function(df, subset_rules, expl_vars, time_col,
           })
           # if no factors, this will be empty, else only return factor names
           all.factor.names <- Reduce("c", all.factors)
-          # this creates the hot encoding by leveraging R's built in contrast
-          # each factor will have its own independent levels
-          # NOTE : these levels have to be applied before the hot encoding as
-          # the hot encoding looks at the category supplied, if for instance
-          # one data set only has 1:10 and the other 11:20 factor levels,
-          # but the coding is done independently, this will cause errors.
-          # at the central server the types should include the GLOBAL levels.
-          contrast.list <- lapply(seq_along(all.factor.names), function(i) {
-              return(contrasts(cases_with_events[[all.factor.names[i]]],
-                               contrasts = F))
-          })
-          # contrast.arg expects a named list
-          names(contrast.list) = all.factor.names
           if(!is.null(all.factor.names)){
-              new.formula <- as.formula(paste("~0+", paste(column_names,
-                                                           collapse = "+")))
-              return(model.matrix(new.formula, data = cases_with_events,
-                                  contrast.arg = contrast.list))
+            # this creates the hot encoding by leveraging R's built in contrast
+            # each factor will have its own independent levels
+            # NOTE : these levels have to be applied before the hot encoding as
+            # the hot encoding looks at the category supplied, if for instance
+            # one data set only has 1:10 and the other 11:20 factor levels,
+            # but the coding is done independently, this will cause errors.
+            # at the central server the types should include the GLOBAL levels.
+            contrast.list <- lapply(seq_along(all.factor.names), function(i) {
+                return(contrasts(cases_with_events[[all.factor.names[i]]],
+                                  contrasts = F))
+            })
+            # contrast.arg expects a named list
+            names(contrast.list) = all.factor.names
+            new.formula <- as.formula(paste("~0+", paste(column_names,
+                                                          collapse = "+")))
+            return(model.matrix(new.formula, data = cases_with_events,
+                                contrast.arg = contrast.list))
           }else{
               return(cases_with_events)
           }
