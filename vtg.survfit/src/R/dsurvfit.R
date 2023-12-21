@@ -177,6 +177,6 @@ dsurvfit <- function(client, formula, conf.int = 0.95, conf.type = "log", tmax =
   master$imgtxt <- txt
   return(list(
     Tab = master$Tab,
-    img = plot
+    imgtxt = master$imgtxt
   ))
 }
