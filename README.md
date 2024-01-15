@@ -1,8 +1,9 @@
 # v6-euracan-algorithms
 
+## Disclosure Settings
 `VTG_PREPROCESS_MIN_RECORDS_THRESHOLD`
 
-## Building image
+## Building Image
 
 Development build
 ```bash
@@ -37,4 +38,5 @@ With `[ALGORITHM]` being the name of the algorithm:
 - `summary`
 - `survfit`
 - `coxph`
+- `crosstab`
 

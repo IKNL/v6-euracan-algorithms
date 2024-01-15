@@ -1,0 +1,24 @@
+vantage6-Comment:
+    **************************************************
+    * This file was generated from DESCRIPTION.tpl   *
+    * Please don't modify it directly! Instead,      *
+    * modify DESCRIPTION.tpl and run the following   *
+    * command:                                       *
+    *   make DESCRIPTION                             *
+    **************************************************
+Package: vtg.crosstab
+Type: Package
+Version: 1.0.0
+Title: vtg.crosstab
+Description: This package can be used with vantage6
+    (see https://github.com/vantage6/vantage6).
+Encoding: UTF-8
+LazyData: true
+Imports:
+    glue,
+    vtg,
+    stats,
+    dplyr
+Remotes:
+    iknl/vtg
+RoxygenNote: 7.1.0
