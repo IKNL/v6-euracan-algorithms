@@ -10,8 +10,8 @@ Package: vtg.summary
 Type: Package
 Version: 1.0.0
 Title: vtg.summary
-Description: This package can be used with the vantage6 federated
-    learning infrastructure (see https://github.com/IKNL/vantage6).
+Description: This package can be used with vantage6
+    (see https://github.com/vantage6/vantage6).
 Encoding: UTF-8
 LazyData: true
 Imports:
