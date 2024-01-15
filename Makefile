@@ -3,6 +3,32 @@ HOST ?= harbor2.vantage6.ai
 IMAGE ?= starter/${PKG_NAME}
 TAG ?= dev
 
+help:
+	@echo "Usage: make [target] ..."
+	@echo ""
+	@echo "Targets:"
+	@echo "  help       Show this help"
+	@echo "  echo       Show variables"
+	@echo "  chisq      Build and push chisq image"
+	@echo "  survfit    Build and push survfit image"
+	@echo "  summary    Build and push summary image"
+	@echo "  coxph      Build and push coxph image"
+	@echo "  crosstab   Build and push crosstab image"
+	@echo "  build      Build PKG_NAME"
+	@echo "  install    Install PKG_NAME"
+	@echo "  uninstall  Uninstall PKG_NAME"
+	@echo "  document   Generate documentation"
+	@echo "  docker     Build docker image"
+	@echo "  docker-build  Build docker image"
+	@echo "  docker-push   Push docker image to registry"
+	@echo ""
+	@echo "Variables:"
+	@echo "  PKG_NAME   Package name"
+	@echo "  HOST       Docker registry host"
+	@echo "  IMAGE      Docker image name"
+	@echo "  TAG        Docker image tag"
+	@echo ""
+
 echo:
 	@echo "package name: ${PKG_NAME}"
 	@echo "  image name: ${IMAGE}"
@@ -20,6 +46,9 @@ summary:
 
 coxph:
 	make docker PKG_NAME=vtg.coxph
+
+crosstab:
+	make docker PKG_NAME=vtg.crosstab
 
 build: install-deps document
 	@echo "*** Building \"$(PKG_NAME)\" ***"
