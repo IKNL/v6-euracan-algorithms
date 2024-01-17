@@ -15,15 +15,15 @@ jobs:
 
         - name: Extract Tag Information
           id: tag_info
-          run: echo "::set-output name=tag::${{ github.ref }}"
+          run: echo "TAG=${{ github.ref }}" >> $GITHUB_ENV
 
         - name: Set Algorithm Name Variable
           id: algorithm
-          run: echo "::set-output name=algorithm::$(echo ${{ steps.tag_info.outputs.tag }} | cut -d '/' -f 3)"
+          run: echo "ALGORITHM=$(echo $TAG | cut -d '/' -f 3)" >> $GITHUB_ENV
 
         - name: Extract Version from Tag
           id: version
-          run: echo "::set-output name=version::$(echo ${{ steps.tag_info.outputs.tag }} | cut -d '/' -f 4)"
+          run: echo "VERSION=$(echo $TAG | cut -d '/' -f 4)" >> $GITHUB_ENV
 
         - name: Login to Docker Hub
           uses: docker/login-action@v3
@@ -33,4 +33,4 @@ jobs:
             password: ${{ secrets.STARTER_HARBOR_SECRET }}
 
         - name: Run Makefile Rule
-          run: make ${{ steps.algorithm.outputs.algorithm }} TAG="${{ steps.version.outputs.version }}"
+          run: make $ALGORITHM TAG=$VERION
