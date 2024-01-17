@@ -1,29 +1,29 @@
 rm(list = ls(all.names = TRUE))
-
-# This seems to be equivalent to "import x as y"
-library(namespace)
-tryCatch({
-    invisible(registerNamespace('vtg', loadNamespace('vtg')))
-}, error = function(e) {
-    vtg::writeln("Package 'vantage.infrastructure' already loaded.")
-})
-
+devtools::load_all("./src")
+devtools::load_all("../vtg.preprocessing")
 library(vtg.crosstab)
 
-data <- data.frame(Type = paste0("T", rep(1:4, 9*4)),
-                   Subj = gl(9, 4, 36*4),event=rbinom(36*4,1,.5))
-data$Subj=as.numeric(data$Subj)
-D1  <- data[data$Subj%in%c(1,2,3), ]
-D2  <- data[data$Subj%in%c(4,5,6), ]
-D3  <- data[data$Subj%in%c(7,8,9), ]
+data1 <- read.csv("/mnt/c/data/euracan-node-a.csv")
+data2 <- read.csv("/mnt/c/data/euracan-node-b.csv")
+data2 <- data2[data2$e34_cstage != 5, ]
 
-dataset = list(D1,D2,D3)
+# change the first row and make b04_sex collumn 999
+data2$b04_sex[1] <- 999
 
-formula = as.formula(~ Type + Subj + event)
+dataset <- list(data1, data2)
+
+# Data = rbind(data1, data2)
+
+data_local <- rbind(vtg.preprocessing::extend_data(data1),
+                    vtg.preprocessing::extend_data(data2))
+
+# dataset = rbind(data1, data2)
+
+formula = as.formula(~ e34_cstage + b04_sex)
 
 crosstab.mock <- function(dataset,formula){
     client=vtg::MockClient$new(datasets = dataset,pkgname = 'vtg.crosstab')
-    result=vtg.crosstab::dct(client = client,f = formula,
+    result=vtg.crosstab::dct(client = client, f = formula,
                              organizations_to_include = NULL)
     return(result)
 }

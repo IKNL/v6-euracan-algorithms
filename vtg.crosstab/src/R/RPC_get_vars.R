@@ -27,10 +27,10 @@ RPC_get_vars <- function(data, subset_rules, master) {
     return(data)
   }
 
-  vtg::log$info("Rows before NA removal: {nrow(data)}")
   used_variables <- all.vars(master$formula)
-  data <- na.omit(data[, used_variables])
-  vtg::log$info("Rows after NA removal: {nrow(data)}")
+  data <- data[, used_variables]
+  data[is.na(data)] <-"N/A"
+
 
   f <- master$formula
   vars <- apply(data, 2, unique, simplify = F)

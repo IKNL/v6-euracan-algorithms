@@ -24,8 +24,6 @@ dct <- function(client, f, margin = NULL, percentage = F,
   # this will call itself without the `use.master.container` option
   #
   if (client$use.master.container) {
-    vtg::log$debug(glue::glue("Running `dct` in master container using
-                                  image '{image.name}'.."))
     result <- client$call(
       "dct",
       f = f,
@@ -43,7 +41,7 @@ dct <- function(client, f, margin = NULL, percentage = F,
   # of the `use.master.container` option)
   client$setOrganizations(organizations_to_include)
 
-  ct <- init_formula(f)
+  ct <- vtg.crosstab::init_formula(f)
 
   vtg::log$info("")
   vtg::log$info("###############################################")
@@ -64,6 +62,7 @@ dct <- function(client, f, margin = NULL, percentage = F,
   # VARIABLE CATEGORIES - COLLECT UNIQUE VARIABLE CATEGORIES FROM NODES
   #######################################################################
   ct <- vtg.crosstab::variable_categories(nodes = nodes, master = ct)
+  vtg::log$debug("ct: {ct}")
 
   vtg::log$info("")
   vtg::log$info("###############################################")

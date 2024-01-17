@@ -27,13 +27,14 @@ RPC_CT <- function(data, subset_rules, master) {
     return(data)
   }
 
-  vtg::log$info("Rows before NA removal: {nrow(data)}")
   used_variables <- all.vars(master$formula)
-  data <- na.omit(data[, used_variables])
-  vtg::log$info("Rows after NA removal: {nrow(data)}")
+  data <- data[, used_variables]
+  data[is.na(data)] <- "N/A"
 
   for (i in used_variables) {
     data[, i] <- factor(data[, i], levels = master$var_cat[[i]])
+    vtg::log$debug(i)
+    vtg::log$debug(paste(master$var_cat[[i]], collapse = ", "))
   }
   ct <- xtabs(master$formula, data = data)
   return(ct)

@@ -12,9 +12,14 @@
 #' @export
 #'
 variable_categories <- function(nodes, master){
-    categories <- sapply(all.vars(master$formula), function(i){
-        unique(as.vector(sapply(nodes, function(j) j[[i]])))
-    }, simplify=F)
-    master$var_cat <- categories
-    return(master)
+
+  used_variables <- all.vars(master$formula)
+
+  for (i in used_variables) {
+    for (j in nodes) {
+      master$var_cat[[i]] <- unique(c(master$var_cat[[i]], j[[i]]))
+    }
+  }
+  return(master)
+
 }
