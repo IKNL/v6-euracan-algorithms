@@ -33,4 +33,4 @@ jobs:
             password: ${{ secrets.STARTER_HARBOR_SECRET }}
 
         - name: Run Makefile Rule
-          run: make $ALGORITHM TAG=$VERION
+          run: make $ALGORITHM TAG=$VERSION
