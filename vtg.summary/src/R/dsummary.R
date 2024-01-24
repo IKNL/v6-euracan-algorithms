@@ -161,18 +161,50 @@ combine_node_statistics <- function(summary_per_node, columns) {
   ranges_per_node <- lapply(summary_per_node, function(results) {
     results[["column_ranges"]]
   })
+  vtg::log$debug("ranges_per_node: {ranges_per_node}")
+  factor_counts_per_node <- lapply(summary_per_node, function(results) {
+    results[["factor_counts"]]
+  })
+  vtg::log$debug("factor_counts_per_node2: {factor_counts_per_node}")
+  vtg::log$debug("names: {names(factor_counts_per_node)}")
+
   global_ranges <- list()
-  for (column in columns) {
+  global_factor_counts <- list()
+  # for (column in columns) {
     # combine ranges per column
-    combined_ranges <- lapply(ranges_per_node, function(node_range) {
-      node_range[[column]]
-    })
-    if (all(sapply(combined_ranges, class, simplify = FALSE) == "table")) {
-      # column is a factor, so sum the occurrences of each value
-      global_ranges[[column]] <- Reduce("+", combined_ranges)
-    } else {
-      # column is numeric, so the range is the range of the ranges
-      global_ranges[[column]] <- Reduce("range", combined_ranges)
+
+
+  global_ranges <- Reduce("range", ranges_per_node)
+
+  # Collect all levels from all nodes
+  all_levels <- list()
+  for (node in factor_counts_per_node) {
+    factor_columns <- names(node)
+    for (column in factor_columns) {
+      all_levels[[column]] <- names(node[[column]])
+    }
+  }
+
+  # Compute the unique levels per column
+  unique_levels <- list()
+  for (column in names(all_levels)) {
+    unique_levels[[column]] <- unique(all_levels[column])
+  }
+
+  vtg::log$debug("unique_levels: {unique_levels}")
+
+  # Compute the factor counts per column
+  for (node in factor_counts_per_node) {
+    for (column in factor_columns) {
+      for (levels in unique_levels[[column]]) {
+        for (level in levels) {
+          if (level %in% names(node[[column]])) {
+            global_factor_counts[[column]][[level]] <- node[[column]][[level]]
+          } else {
+            global_factor_counts[[column]][[level]] <- 0
+          }
+        }
+      }
     }
   }
 
@@ -199,6 +231,7 @@ combine_node_statistics <- function(summary_per_node, columns) {
       "nan_count" = global_nan_count,
       "length" = global_column_length,
       "range" = global_ranges,
+      "factor_counts" = global_factor_counts,
       "mean" = global_means,
       "complete_rows" = global_complete_rows,
       "complete_rows_per_node" = complete_rows_per_node

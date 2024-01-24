@@ -29,11 +29,12 @@ RPC_summary <- function(data, columns, types = NULL, subset_rules = NULL,
     data <- vtg.preprocessing::extend_data(data)
   }
   data <- vtg.preprocessing::subset_data(data, subset_rules)
+
   vtg::log$debug("Factorizing character data...")
   data <- vtg.preprocessing::factorize(data)
 
   # execute checks that are common to all RPCs
-  vtg::log$debug("Checking data...")
+  vtg::log$debug("Checking data & Apply types")
   data <- vtg.summary::common_checks_rpc(data, columns, types)
   if ("error" %in% names(data)) {
     # Return error message
@@ -61,6 +62,8 @@ RPC_summary <- function(data, columns, types = NULL, subset_rules = NULL,
 
   # compute data range
   vtg::log$debug("Computing column ranges...")
+  # FIXME FM 24-01-24: in case of a factor column, the range is not computed but the
+  # count of each factor is returned. This is not a range
   column_ranges <- get_column_ranges(data, columns)
 
   # check if there are disclosure risks for factors in column ranges. If so,
@@ -90,7 +93,8 @@ RPC_summary <- function(data, columns, types = NULL, subset_rules = NULL,
       "nan_count" = nan_count,
       "column_lengths" = column_lengths,
       "column_sums" = column_sums,
-      "column_ranges" = column_ranges,
+      "column_ranges" = column_ranges[setdiff(names(column_ranges), factor_columns)],
+      "factor_counts" = as.list(column_ranges[factor_columns]),
       "complete_rows" = complete_rows
     )
   )

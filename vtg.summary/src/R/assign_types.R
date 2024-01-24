@@ -24,11 +24,16 @@ assign_types <- function(data, types) {
       data[[column_name]] <- as.numeric(data[[column_name]])
     } else if (type_ == "factor") {
       # TODO check if this is what we want: we basically filter the data here!
-      data <- data[data[[column_name]] %in% specs$levels,]
-      data[[column_name]] <- factor(data[[column_name]], levels = specs$levels)
+
+      if (!is.null(specs$levels)) {
+        data <- data[data[[column_name]] %in% specs$levels,]
+        data[[column_name]] <- factor(data[[column_name]], levels = specs$levels)
+      }
+
       if (!is.null(specs$ref)) {
         data[[column_name]] <- relevel(data[[column_name]], ref = specs$ref)
       }
+
     } else {
       # TODO error message, wrong type
     }
