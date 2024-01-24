@@ -9,11 +9,8 @@ data <- data.frame("A" = sample(1:10, size = 1000, replace = TRUE),
                    "B" = sample(c(1:3, NA), size= 1000, replace = TRUE),
                    "C" = sample(c(6:19, NA), size= 1000, replace = TRUE),
                    "D" = sample(gl(10, 100), size = 1000, replace = TRUE),
-                   "E" = sample(factor(as.character(c("female", "male", NA))),
+                   "E" = sample(as.character(c("female", "male", NA)),
                                 size = 1000, replace = TRUE))
-
-print(sapply(data, class)[["A", "B"]])
-awef
 
 
 # Split the dataframe into two sets

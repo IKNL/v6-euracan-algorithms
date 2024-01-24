@@ -27,7 +27,6 @@
 #' @author Frank Martin
 #' @author Bart van Beusekom
 #'
-#' @TODO add extending and subsetting data
 dsummary <- function(client, columns, types = NULL,
                      organizations_to_include = NULL, subset_rules = NULL,
                      is_extend_data = TRUE) {

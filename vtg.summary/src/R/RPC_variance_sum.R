@@ -25,6 +25,8 @@ RPC_variance_sum <- function(data, columns, mean, types = NULL,
     data <- vtg.preprocessing::extend_data(data)
   }
   data <- vtg.preprocessing::subset_data(data, subset_rules)
+  vtg::log$debug("Factorizing character data...")
+  data <- vtg.preprocessing::factorize(data)
 
   # execute checks that are common to all RPCs
   data <- vtg.summary::common_checks_rpc(data, columns, types)

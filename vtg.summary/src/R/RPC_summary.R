@@ -21,6 +21,7 @@
 #' @TODO check if works with single column
 RPC_summary <- function(data, columns, types = NULL, subset_rules = NULL,
                         is_extend_data = TRUE) {
+
   vtg::log$set_threshold("debug")
   # TODO if preprocessing active, logs of RPC functions are not printed. Why?
   # Data pre-processing specific to EURACAN
@@ -28,6 +29,8 @@ RPC_summary <- function(data, columns, types = NULL, subset_rules = NULL,
     data <- vtg.preprocessing::extend_data(data)
   }
   data <- vtg.preprocessing::subset_data(data, subset_rules)
+  vtg::log$debug("Factorizing character data...")
+  data <- vtg.preprocessing::factorize(data)
 
   # execute checks that are common to all RPCs
   vtg::log$debug("Checking data...")
@@ -119,9 +122,7 @@ get_column_ranges <- function(data, columns) {
   # factorial summary - omit NAs to not make that a separate category
   summary_factors <- NULL
   if (length(factor_columns) > 0) {
-    summary_factors <- sapply(
-      as.data.frame(na.omit(data[, factor_columns])), summary, simplify = FALSE
-    )
+    summary_factors <- sapply(as.data.frame(na.omit(data[, factor_columns])), summary, simplify = FALSE)
     names(summary_factors) <- factor_columns
   }
 
