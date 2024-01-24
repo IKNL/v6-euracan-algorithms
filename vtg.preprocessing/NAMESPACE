@@ -2,3 +2,4 @@
 
 export(extend_data)
 export(subset_data)
+export(factorize)

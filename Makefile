@@ -17,7 +17,7 @@ help:
 	@echo "  build      Build PKG_NAME"
 	@echo "  install    Install PKG_NAME"
 	@echo "  uninstall  Uninstall PKG_NAME"
-	@echo "  document   Generate documentation"
+	@echo "  document   Generate R documentation"
 	@echo "  docker     Build docker image"
 	@echo "  docker-build  Build docker image"
 	@echo "  docker-push   Push docker image to registry"
