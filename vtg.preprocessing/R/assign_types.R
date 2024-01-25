@@ -17,7 +17,7 @@
 assign_types <- function(data, types) {
 
   column_names <- names(types)
-
+  vtg::log$debug("Assigning types to columns: ", column_names)
 
   # for each specified column in types set the appropiate type
   for (i in seq_len(length(types))) {
