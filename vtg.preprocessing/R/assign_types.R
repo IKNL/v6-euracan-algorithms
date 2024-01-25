@@ -1,9 +1,16 @@
-#' Assign numeric or factor type to columns specified.
+#' Set the types of the columns of a dataframe
 #'
 #' @param data dataframe
 #' @param types containing the types to set to the columns
+#'   'types': {'column_name': {'type': 'numeric' | 'factor'},
+#'             'column_name': {
+#'               'type': 'factor',
+#'               'levels': ['a', 'b', 'c'],
+#'               'ref': 'a'
+#'              }
+#'           }
 #'
-#' @return formatted dataframe
+#' @return dataframe with the specified types
 #'
 #' @export
 #'
@@ -11,17 +18,18 @@ assign_types <- function(data, types) {
 
   column_names <- names(types)
 
-  # TODO validate types, if fails return error
-  # types should be a list with elements $type and (if $type == "factor")
-  # $levels and (if $type == "factor" and $ref != NULL) $ref
 
-  # for each column specified in types set the appropiate type
+  # for each specified column in types set the appropiate type
   for (i in seq_len(length(types))) {
+
     column_name <- column_names[i]
     specs <- types[[i]]
     type_ <- specs$type
+
     if (type_ == "numeric") {
+
       data[[column_name]] <- as.numeric(data[[column_name]])
+
     } else if (type_ == "factor") {
       # TODO check if this is what we want: we basically filter the data here!
 
@@ -37,10 +45,9 @@ assign_types <- function(data, types) {
       }
 
     } else {
-      # TODO error message, wrong type
+      vtg::log$error("Wrong type specified: ", type_, ". Continuing with next column.")
     }
   }
-
 
   return(data)
 }
