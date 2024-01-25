@@ -38,6 +38,7 @@ RPC_summary <- function(data, columns, types = NULL, subset_rules = NULL,
   data <- vtg.summary::common_checks_rpc(data, columns, types)
   if ("error" %in% names(data)) {
     # Return error message
+    # FIXME: this is not safe
     return(data)
   }
 

@@ -161,12 +161,11 @@ combine_node_statistics <- function(summary_per_node, columns) {
   ranges_per_node <- lapply(summary_per_node, function(results) {
     results[["column_ranges"]]
   })
-  vtg::log$debug("ranges_per_node: {ranges_per_node}")
+
   factor_counts_per_node <- lapply(summary_per_node, function(results) {
     results[["factor_counts"]]
   })
-  vtg::log$debug("factor_counts_per_node2: {factor_counts_per_node}")
-  vtg::log$debug("names: {names(factor_counts_per_node)}")
+
 
   global_ranges <- list()
   global_factor_counts <- list()

@@ -7,6 +7,8 @@
 #' message if there is an error
 common_checks_rpc <- function(data, columns, types) {
   # check if all requested columns are in the data. If not, return error
+  vtg::log$debug("Performing common checks...")
+
   columns <- unique(columns)
   columns_present <- get_columns_in_data(data, columns)
   if (length(columns_present) != length(columns)) {
@@ -17,7 +19,7 @@ common_checks_rpc <- function(data, columns, types) {
 
   # Assign types
   if (!is.null(types)) {
-    vtg.preprocessing::assign_types(data, types)
+    data <- vtg.preprocessing::assign_types(data, types)
   }
 
   # check if all columns are either numeric or factors. If not, return error

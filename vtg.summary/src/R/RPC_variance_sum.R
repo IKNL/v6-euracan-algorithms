@@ -29,7 +29,7 @@ RPC_variance_sum <- function(data, columns, mean, types = NULL,
   data <- vtg.preprocessing::factorize(data)
 
   # execute checks that are common to all RPCs
-  data <- vtg.preprocessing::common_checks_rpc(data, columns, types)
+  data <- vtg.summary::common_checks_rpc(data, columns, types)
   if ("error" %in% names(data)) {
     # Return error message
     return(data)
