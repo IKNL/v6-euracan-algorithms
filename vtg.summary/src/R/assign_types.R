@@ -28,6 +28,8 @@ assign_types <- function(data, types) {
       if (!is.null(specs$levels)) {
         data <- data[data[[column_name]] %in% specs$levels,]
         data[[column_name]] <- factor(data[[column_name]], levels = specs$levels)
+      } else {
+        data[[column_name]] <- factor(data[[column_name]])
       }
 
       if (!is.null(specs$ref)) {
