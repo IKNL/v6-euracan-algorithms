@@ -40,3 +40,20 @@ With `[ALGORITHM]` being the name of the algorithm:
 - `coxph`
 - `crosstab`
 
+## Documentation
+
+The documentation is generated using sphinx. To generate the documentation you need to install the dependencies:
+
+```bash
+pip install -r docs/requirements.txt
+```
+
+Then you can generate the documentation with:
+
+```bash
+cd docs
+make livehtml
+```
+
+Then you can view the documentation at `http://localhost:8000`.
+
