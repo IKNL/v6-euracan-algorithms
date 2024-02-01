@@ -191,16 +191,25 @@ combine_node_statistics <- function(summary_per_node, columns) {
   }
 
   vtg::log$debug("unique_levels: {unique_levels}")
+  # Initialize global_factor_counts
+  for (column in names(all_levels)) {
+    global_factor_counts[[column]] <- list()
+    for (levels in unique_levels[[column]]) {
+      for (level in levels) {
+        global_factor_counts[[column]][[level]] <- 0
+      }
+    }
+  }
 
+  vtg::log$debug("Global levels initialized: {global_factor_counts}")
   # Compute the factor counts per column
   for (node in factor_counts_per_node) {
     for (column in factor_columns) {
       for (levels in unique_levels[[column]]) {
         for (level in levels) {
           if (level %in% names(node[[column]])) {
-            global_factor_counts[[column]][[level]] <- node[[column]][[level]]
-          } else {
-            global_factor_counts[[column]][[level]] <- 0
+            global_factor_counts[[column]][[level]] <-
+              global_factor_counts[[column]][[level]] + node[[column]][[level]]
           }
         }
       }

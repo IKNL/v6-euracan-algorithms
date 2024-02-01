@@ -5,21 +5,23 @@ devtools::load_all("./vtg.preprocessing")
 # create fake data. Three columns with random numbers, two columns with factors
 set.seed(123L);
 columns = c("A", "B", "C", "D", "E")
+l <- 250
 data <- data.frame(
-  "A" = sample(1:10, size = 1000, replace = TRUE),
-  "B" = sample(c(1:3, NA), size= 1000, replace = TRUE),
-  "C" = sample(c(6:19, NA), size= 1000, replace = TRUE),
-  "D" = sample(gl(10, 100), size = 1000, replace = TRUE),
+  "A" = sample(1:10, size = l, replace = TRUE),
+  "B" = sample(c(1:3, NA), size= l, replace = TRUE),
+  "C" = sample(c(6:19, NA), size= l, replace = TRUE),
+  "D" = sample(gl(4, 1), size = l, replace = TRUE),
   "E" = sample(as.character(c("female", "male", NA)),
-               size = 1000, replace = TRUE),
+               size = l, replace = TRUE),
   "F" = sample(as.character(c("other")),
-               size = 1000, replace = TRUE)
+               size = l, replace = TRUE)
 )
 
 
 # Split the dataframe into two sets
 n_rows <- nrow(data)
-set_size <- floor(n_rows / 2)
+set_size <- floor(l / 3)
+# set_size <- 200
 
 d1 <- data[1:set_size, ]
 d2 <- data[(set_size + 1):n_rows, ]
