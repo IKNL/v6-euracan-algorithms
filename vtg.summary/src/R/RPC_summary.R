@@ -123,7 +123,11 @@ get_column_ranges <- function(data, columns) {
   # numeric summary
   summary_numeric <- NULL
   if (length(numeric_columns) > 0) {
-    summary_numeric <- do.call(cbind, lapply(data[, numeric_columns], summary))
+    if (length(numeric_columns) == 1) {
+      summary_numeric <- cbind(numeric_columns=summary(data[, numeric_columns]))
+      colnames(summary_numeric) <- numeric_columns
+    } else {
+      summary_numeric <- do.call(cbind, lapply(data[, numeric_columns], summary))
   }
 
   # factorial summary - omit NAs to not make that a separate category
