@@ -94,7 +94,7 @@ RPC_summary <- function(data, columns, types = NULL, subset_rules = NULL,
       "nan_count" = nan_count,
       "column_lengths" = column_lengths,
       "column_sums" = column_sums,
-      "column_ranges" = column_ranges[setdiff(names(column_ranges), factor_columns)],
+      "column_ranges" = as.list(column_ranges[setdiff(names(column_ranges), factor_columns)]),
       "factor_counts" = as.list(column_ranges[factor_columns]),
       "complete_rows" = complete_rows
     )
@@ -128,6 +128,7 @@ get_column_ranges <- function(data, columns) {
       colnames(summary_numeric) <- numeric_columns
     } else {
       summary_numeric <- do.call(cbind, lapply(data[, numeric_columns], summary))
+    }
   }
 
   # factorial summary - omit NAs to not make that a separate category

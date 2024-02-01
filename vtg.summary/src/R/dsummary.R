@@ -172,8 +172,13 @@ combine_node_statistics <- function(summary_per_node, columns) {
   # for (column in columns) {
     # combine ranges per column
 
+  #TODO breaks when not all columns are present in all nodes
+  for (column in names(ranges_per_node[[1]])) {
 
-  global_ranges <- Reduce("range", ranges_per_node)
+    global_ranges[[column]] <-
+      Reduce("range", lapply(ranges_per_node, function (x) { x[column]}))
+  }
+  # global_ranges <- Reduce("range", ranges_per_node)
 
   # Collect all levels from all nodes
   all_levels <- list()
