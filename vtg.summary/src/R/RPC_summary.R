@@ -117,6 +117,8 @@ get_column_sums <- function(data, columns) {
 get_column_ranges <- function(data, columns) {
   factor_columns <- columns[sapply(as.data.frame(data[, columns]), is.factor)]
   numeric_columns <- columns[sapply(as.data.frame(data[, columns]), is.numeric)]
+  vtg::log$debug("Factor columns: ", factor_columns)
+  vtg::log$debug("Numeric columns: ", numeric_columns)
 
   # numeric summary
   summary_numeric <- NULL
