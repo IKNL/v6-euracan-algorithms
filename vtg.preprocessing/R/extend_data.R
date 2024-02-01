@@ -45,9 +45,9 @@ extend_data <- function(data) {
       TRUE ~ NA_real_
     )) %>%
     # anni di  diagnosi e di follow-up
-    mutate(year_diag = format(d01_diagdate, format = "%Y")) %>%
+    mutate(year_diag = format(as.Date(d01_diagdate), format = "%Y")) %>%
     # mutate(datesfu = as.Date(h02_datelasfup, "%Y-%m-%d"))%>%
-    mutate(yearF = format(h02_datelasfup, format = "%Y")) %>%
+    mutate(yearF = format(as.Date(h02_datelasfup), format = "%Y")) %>%
     # BMI
     mutate(BMI = ifelse(!is.na(b18_bmi), b18_bmi, b18b_bmimanu)) %>%
     mutate(catBMI = ifelse(BMI < 18.5, 1, ifelse(BMI >= 18.5 & BMI < 25, 2, ifelse(BMI >= 25 & BMI < 30, 3, ifelse(BMI >= 30 & BMI != ".", 4, ifelse(BMI == ".", 999, NA_real_)))))) %>%
