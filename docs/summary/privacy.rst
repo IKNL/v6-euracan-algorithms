@@ -1,9 +1,9 @@
 Privacy
 =======
 
-Gaurds
+Guards
 ------
-There are several privacy gaurds in place to protect privacy of the individual records.
+There are several privacy guards in place to protect privacy of the individual records.
 
 * The number of observations, after removing the ``NA`` values from each column, need to
   be at least higher than the ``VTG_SUMMARY_THRESHOLD`` threshold (default 5) to be
@@ -31,7 +31,7 @@ Data that is shared by the data stations with the aggregator is the following:
       shared.
     * if :math:`d_i` is a numeric, the sum of all observations is shared.
 
-  Implementation details can be found in :doc:`./implementation`.
+  The implementation details can be found in :doc:`./implementation`.
 
 There are four types of parties handling data in the algorithm; (1) The aggregator,
 (2) the data stations, (3) the client and (4) the vantage6 server. See
@@ -66,6 +66,8 @@ it merely acts  as a communication hub between data station, aggregator and rese
 
 Vunerability to Known Attacks
 -----------------------------
+
+.. TODO FM 30-01-2024: We should add a glossary with the attacks and their description.
 
 .. list-table::
     :widths: 25 10 65

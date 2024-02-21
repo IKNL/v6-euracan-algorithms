@@ -4,8 +4,9 @@ Implementation
 
 Overview
 --------
-The algorithm consists of two computation steps at the nodes. The two step approach
-is necessary as the variance computation requires the global mean of each column.
+The algorithm consists of two computation steps at the nodes. In the first step at
+the node ``RPC_summary`` everything except the variance is computed. The second step
+the variance is computed using the mean from the first step.
 
 .. uml::
 
@@ -29,7 +30,6 @@ is necessary as the variance computation requires the global mean of each column
   |central|
   :Aggragate summary results;
   -> global mean;
-
   |partial|
   :RPC_variance_sum;
 
@@ -44,52 +44,56 @@ is necessary as the variance computation requires the global mean of each column
 
 Partials
 --------
+Partials are the computations that are executed on each node. The partials have access
+to the data that is stored on the node. The partials are executed in parallel on each
+node.
 
 ``RPC_summary``
 ~~~~~~~~~~~~~~~
-Each nodes computes the following statistics:
+The goal of this function is to compute majority of the variables required for the
+summary. Each node computes the following statistics:
 
 * | **NA counts**
-  | Computes the number of NANs in each column.
+  | Computes the number of ``NA`` values in each column.
 
-  .. code-block:: R
-
-    colSums(is.na(data))
+..  .. code-block:: R
+..
+..    colSums(is.na(data))
 
 
 * | **Column lengths**
-  | Computes the number of non-NANs in each column.
+  | Computes the number of non ``NA`` values in each column.
 
-  .. code-block:: R
-
-    colSums(!is.na(data))
+..  .. code-block:: R
+..
+..    colSums(!is.na(data))
 
 * | **Column sums**
   | Computes the sum of each column if the column is numerical.
 
-  .. code-block:: R
-
-    sum(data[, column_name])
+..  .. code-block:: R
+..
+..    sum(data[, column_name])
 
 * | **Column ranges**
   | Computes the range of each column if the column is numerical.
 
-  .. code-block:: R
-
-    # min
-    summary(data[, column_name])["Min."]
-
-    # max
-    summary(data[, column_name])["Max."]
+..  .. code-block:: R
+..
+..    # min
+..    summary(data[, column_name])["Min."]
+..
+..    # max
+..    summary(data[, column_name])["Max."]
 
 
 * | **Factor Counts**
   | Computes the number of occurences of each factor in each column.
 
-  .. code-block:: R
-
-    # counts
-    summary(data[, column_name])
+..  .. code-block:: R
+..
+..    # counts
+..    summary(data[, column_name])
 
 
 ``RPC_variance_sum``
@@ -110,26 +114,26 @@ the output of ``RPC_summary`` as it needs the global mean from each column.
 
   | with :math:`S_j` being the sum of squared differences from node :math:`j` and :math:`d_i` being the data point :math:`i` in column :math:`d`.
 
-  .. code-block:: R
+..  .. code-block:: R
+..
+..    # Sum of squared differences from the mean
+..    sum((data[, column] - mean[[column]])^2)
 
-    # Sum of squared differences from the mean
-    sum((data[, column] - mean[[column]])^2)
 
-
-Central
+Central (``dsummary``)
 -------
 The central part of the algorithm is responsible for the orcastration and aggregation
 of the algorithm. Only the aggregation part is described here as the orcastration is
 not relevant for the algorithm itself.
 
 * | **NA counts / Column lengths / Column sums**
-  | The NA counts, column lengths and column sums produced by ``RPC_summary`` are
-  | aggregated by summing up the results from each node:
+  | The ``NA`` counts, column lengths and column sums produced by ``RPC_summary`` are
+  | aggregated by summing up the results from each node.
 
-  .. code-block:: R
-
-    # with ``results`` being either the NA counts, column lengths or column sums:
-    sum(results)
+..  .. code-block:: R
+..
+..    # with ``results`` being either the NA counts, column lengths or column sums:
+..    sum(results)
 
 
 
@@ -137,32 +141,35 @@ not relevant for the algorithm itself.
   | The column ranges computed by ``RPC_summary`` are aggregated by taking the minimum
   | of the minimums and the maximum of the maximums.
 
-  .. code-block:: R
-
-    # min
-    min(mins)
-
-    # max
-    max(maxs)
+..  .. code-block:: R
+..
+..    # min
+..    min(mins)
+..
+..    # max
+..    max(maxs)
 
 * | **Factor Counts**
   | The factor counts produced by ``RPC_summary`` are aggregated by summing up the
   | results from each node. It sums all the counts for each factor in each column.
 
-  .. code-block:: R
-
-    # with ``counts`` being the count for each factor in each column:
-    sum(counts)
+..  .. code-block:: R
+..
+..    # with ``counts`` being the count for each factor in each column:
+..    sum(counts)
 
 * | **Column variances**
   | The column variances produced by ``RPC_variance_sum`` are aggregated by summing
-  | up the results from each node.
+  | up the results from each node and dividing by :math:`(n - 1)` where :math:`n` is
+  | the number of observations in the dataset (over all nodes). This computes the
+  | *sample* variance.
 
   .. math::
 
     \frac{1}{(n - 1)}\sum_{j=1}^{n} S_j
 
-  .. code-block:: R
+..  .. code-block:: R
+..
+..    # with ``variances`` being the variance for each numerical column:
+..    sum(variances) / (n - 1)
 
-    # with ``variances`` being the variance for each numerical column:
-    sum(variances) / (n - 1)

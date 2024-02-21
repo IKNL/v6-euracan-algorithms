@@ -31,8 +31,6 @@ RPC_get_vars <- function(data, subset_rules, master) {
   data <- data[, used_variables]
   data[is.na(data)] <-"N/A"
 
-
-  f <- master$formula
-  vars <- apply(data, 2, unique, simplify = F)
+  vars <- apply(data, 2, unique, simplify = FALSE)
   return(vars)
 }

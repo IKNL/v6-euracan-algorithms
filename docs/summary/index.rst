@@ -1,35 +1,80 @@
 Summary
 =======
 
-The summary algorithm aims to provide statistics about the data per column. It will
-return a list containing the following:
+The summary algorithm aims to provide statistics about the data per column. It took
+inspiration from the R build-in function
+`summary <https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/summary>`_.
+It will return a list containing the following:
 
-- ``nan_count`` representing each unique column's number of missing values
-- ``length`` representing total length of each column across each site
-- ``range`` a list of ranges per column
-- ``mean`` a vector of means per column
-- ``variance`` a vector of variance per column
-- ``complete_rows_per_node`` the number of complete rows per node
-- ``complete_rows`` is the sum of the complete rows per node
+.. list-table::
 
-See how these are computed in the :doc:`/summary/implementation` section. See the
-privacy considerations in the :doc:`/summary/privacy` section.
+  * - Output
+    - Description
+  * - ``nan_count``
+    - number of missing values per column
+  * - ``length``
+    - total length of each column across each site (excluding missing values)
+  * - ``range``
+    - a list of ranges per numerical column
+  * - ``mean``
+    - a list of means per numerical column
+  * - ``variance``
+    - a list of variances per numerical column
+  * - ``factor_counts``
+    - a list of dictionaries containing the number of occurrences of each unique value per categorical column
+  * - ``complete_rows_per_node``
+    - the number of complete rows
+  * - ``complete_rows``
+    - the number of complete rows
+
+To learn how these are calculated, refer to the :doc:`/summary/implementation` section.
+The :doc:`/summary/privacy` section discusses the privacy implications. The
+:doc:`/summary/validation` section discusses the validation of the algorithm.
 
 Authors
 -------
-Hasan Alradhi, Matteo Cellamare, Frank Martin, Bart van Beusekom, Anja van Gestel
+Hasan Alradhi [1]_, Matteo Cellamare, Frank Martin [1]_, Bart van Beusekom [1]_, Anja van Gestel [1]_
 
-Example
--------
+.. [1] IKNL (Integraal Kankercentrum Nederland)
+
+Source
+------
+
+The source code of the algorithm can be found in the
+`EURACAN repository <https://github.com/iknl/v6-euracan-algorithms>`_.
+A docker image can be used from:
+
+.. code-block:: bash
+
+  harbor2.vantage6.ai/starter/vtg.summary
+
+Or when you want to use a specific version:
+
+.. code-block:: bash
+
+  harbor2.vantage6.ai/starter/vtg.summary:0.0.1
+
+Example Usage
+-------------
+
+.. TODO FM 30-01-2024: remove the output_format from the example when releaseing for
+    vantage6 v4+.
 
 .. code-block:: python
 
   from vantage6.client import Client
 
+  server = 'http://localhost'
+  port = 5000
+  api_path = '/api'
+  private_key = None
+  username = 'root'
+  password = 'password'
+
   # Create connection with the vantage6 server
-  client = Client('http://localhost', 5000, '/api')
-  client.setup_encryption(None)
-  client.authenticate('root', 'password')
+  client = Client(server, port, api_path)
+  client.setup_encryption(private_key)
+  client.authenticate(username, password)
 
   input_ ={
       'master': True, 'method': 'dsummary', 'args': [],
@@ -65,6 +110,6 @@ Contents
    :maxdepth: 2
 
    implementation
-   validation
    usage
    privacy
+   validation

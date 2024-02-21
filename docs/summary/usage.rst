@@ -1,9 +1,9 @@
-Usage
-=====
+How to use
+==========
 
-This expects you to be familiar with the vantage6 framework. If you are not, please
-read the `documentation <https://docs.vantage6.ai>`_ first. Especially the part
-about the `Python client <https://docs.vantage6.ai/en/main/user/pyclient.html>`_.
+To understand the information on this page, you should be familiar with the vantage6
+framework. If you are not, please read the `documentation <https://docs.vantage6.ai>`_
+first. Especially the part about the `Python client <https://docs.vantage6.ai/en/main/user/pyclient.html>`_.
 
 Input arguments
 ---------------
@@ -39,10 +39,17 @@ make any subselections.
 
   from vantage6.client import Client
 
+  server = 'http://localhost'
+  port = 5000
+  api_path = '/api'
+  private_key = None
+  username = 'root'
+  password = 'password'
+
   # Create connection with the vantage6 server
-  client = Client('http://localhost', 5000, '/api')
-  client.setup_encryption(None)
-  client.authenticate('root', 'password')
+  client = Client(server, port, api_path)
+  client.setup_encryption(private_key)
+  client.authenticate(username, password)
 
   input_ ={
       'master': True, 'method': 'dsummary', 'args': [],
@@ -78,10 +85,17 @@ to ``factor``. In the example below we convert the column ``children`` to a fact
 
   from vantage6.client import Client
 
+  server = 'http://localhost'
+  port = 5000
+  api_path = '/api'
+  private_key = None
+  username = 'root'
+  password = 'password'
+
   # Create connection with the vantage6 server
-  client = Client('http://localhost', 5000, '/api')
-  client.setup_encryption(None)
-  client.authenticate('root', 'password')
+  client = Client(server, port, api_path)
+  client.setup_encryption(private_key)
+  client.authenticate(username, password)
 
   input_ ={
       'master': True, 'method': 'dsummary', 'args': [],
@@ -118,10 +132,17 @@ of the data by selecting only the rows where the column ``children`` is equal to
 
   from vantage6.client import Client
 
+  server = 'http://localhost'
+  port = 5000
+  api_path = '/api'
+  private_key = None
+  username = 'root'
+  password = 'password'
+
   # Create connection with the vantage6 server
-  client = Client('http://localhost', 5000, '/api')
-  client.setup_encryption(None)
-  client.authenticate('root', 'password')
+  client = Client(server, port, api_path)
+  client.setup_encryption(private_key)
+  client.authenticate(username, password)
 
   input_ ={
       'master': True, 'method': 'dsummary', 'args': [],
