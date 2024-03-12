@@ -121,7 +121,7 @@ the output of ``RPC_summary`` as it needs the global mean from each column.
 
 
 Central (``dsummary``)
--------
+----------------------
 The central part of the algorithm is responsible for the orcastration and aggregation
 of the algorithm. Only the aggregation part is described here as the orcastration is
 not relevant for the algorithm itself.

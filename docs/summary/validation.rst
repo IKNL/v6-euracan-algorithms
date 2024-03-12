@@ -1,14 +1,14 @@
 Validation
 ==========
 
-We have validated the `dsummary` against the R `summary` function. The outputs
+We have validated the ``dsummary`` against the R ``summary`` function. The outputs
 are identical.
 
 
-First lets create some example data. We will use the `set.seed` function to
+First lets create some example data. We will use the ``set.seed`` function to
 ensure that the results are reproducible.
 
-.. code-block:: r
+.. code-block:: R
   :caption: Example data
 
   # Create a data frame with some missing values. Using numerical and categorical
@@ -27,9 +27,10 @@ ensure that the results are reproducible.
                 size = l, replace = TRUE)
   )
 
+
 Compute the summary statistics using the R build-in `summary` function.
 
-.. code-block:: r
+.. code-block:: R
   :caption: R summary function
 
   summary(data)
@@ -59,7 +60,7 @@ Compute the summary statistics using the R build-in `summary` function.
 Before we can start the federated analysis we need to split the dataset at least into
 two parts:
 
-.. code-block:: r
+.. code-block:: R
   :caption: Split the data
 
   # Split the data into two parts

@@ -1,6 +1,5 @@
 How to use
 ==========
-
 To understand the information on this page, you should be familiar with the vantage6
 framework. If you are not, please read the `documentation <https://docs.vantage6.ai>`_
 first. Especially the part about the `Python client <https://docs.vantage6.ai/en/main/user/pyclient.html>`_.

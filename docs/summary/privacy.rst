@@ -36,7 +36,7 @@ Data that is shared by the data stations with the aggregator is the following:
 There are four types of parties handling data in the algorithm; (1) The aggregator,
 (2) the data stations, (3) the client and (4) the vantage6 server. See
 :doc:`./implementation` for a swimlane diagram. Note that the server is not displayed as
-it merely acts  as a communication hub between data station, aggregator and researcher.
+it merely acts as a communication hub between data station, aggregator and researcher.
 
 
 .. list-table::

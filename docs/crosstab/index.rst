@@ -56,6 +56,9 @@ Or when you want to use a specific version:
   harbor2.vantage6.ai/starter/vtg.summary:0.0.5
 
 
+Contents
+--------
+
 .. toctree::
    :maxdepth: 2
 
