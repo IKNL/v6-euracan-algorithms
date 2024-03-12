@@ -13,9 +13,11 @@
 #'   list containing aggretated statistics
 RPC_perform_iteration <- function(df, subset_rules, expl_vars, time_col,
                                   censor_col, beta, unique_event_times,
-                                  types = NULL) {
+                                  types = NULL, extend_data = TRUE) {
   # Data pre-processing specific to EURACAN
-  df <- vtg.preprocessing::extend_data(df)
+  if (extend_data){
+    df <- vtg.preprocessing::extend_data(df)
+  }
   df <- tryCatch(
     vtg.preprocessing::subset_data(df, subset_rules),
     error = function(e) {

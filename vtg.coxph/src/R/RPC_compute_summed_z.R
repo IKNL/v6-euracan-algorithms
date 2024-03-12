@@ -12,10 +12,12 @@
 #' Return:
 #'   numeric vector with sums and named index with covariates.
 RPC_compute_summed_z <- function(df, subset_rules, expl_vars, time_col,
-                                 censor_col, types = NULL) {
+                                 censor_col, types = NULL, extend_data = TRUE) {
 
   # Data pre-processing specific to EURACAN
-  df <- vtg.preprocessing::extend_data(df)
+  if (extend_data){
+    df <- vtg.preprocessing::extend_data(df)
+  }
   df <- tryCatch(
     vtg.preprocessing::subset_data(df, subset_rules),
     error = function(e) {

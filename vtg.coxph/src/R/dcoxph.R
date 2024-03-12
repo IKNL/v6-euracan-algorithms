@@ -19,7 +19,8 @@
 #' @export
 #'
 dcoxph <- function(client, expl_vars, time_col, censor_col, types = NULL,
-                   organizations_to_include = NULL, subset_rules = NULL) {
+                   organizations_to_include = NULL, subset_rules = NULL,
+                   extend_data = TRUE) {
 
   # Create a logger
   lgr::threshold("debug")
@@ -41,7 +42,7 @@ dcoxph <- function(client, expl_vars, time_col, censor_col, types = NULL,
     result <- client$call("dcoxph", expl_vars = expl_vars, time_col = time_col,
                           censor_col = censor_col, types = types,
                           organizations_to_include = organizations_to_include,
-                          subset_rules = subset_rules)
+                          subset_rules = subset_rules, extend_data = extend_data)
     return(result)
   }
 
@@ -58,7 +59,8 @@ dcoxph <- function(client, expl_vars, time_col, censor_col, types = NULL,
   vtg::log$info("Getting unique event times and counts")
   results <- client$call("get_unique_event_times_and_counts",
                          expl_vars = expl_vars, subset_rules = subset_rules,
-                         time_col = time_col, censor_col = censor_col, types = types)
+                         time_col = time_col, censor_col = censor_col, types = types,
+                         extend_data = extend_data)
   vtg::log$info("Results from `get_unique_event_times_and_counts` received.")
 
   errors <- vtg::collect_errors(results)
@@ -88,7 +90,8 @@ dcoxph <- function(client, expl_vars, time_col, censor_col, types = NULL,
   vtg::log$info("Getting the summed Z statistic")
   summed_zs <- client$call("compute_summed_z", subset_rules = subset_rules,
                            expl_vars = expl_vars, time_col = time_col,
-                           censor_col = censor_col, types = types)
+                           censor_col = censor_col, types = types,
+                           extend_data = extend_data)
   vtg::log$info("Results from `compute_summed_z` received.")
 
   errors <- vtg::collect_errors(summed_zs)
@@ -126,7 +129,8 @@ dcoxph <- function(client, expl_vars, time_col, censor_col, types = NULL,
     aggregates <- client$call("perform_iteration", subset_rules = subset_rules,
                               expl_vars = expl_vars, time_col = time_col,
                               censor_col = censor_col, beta = beta,
-                              unique_event_times = unique_event_times, types = types)
+                              unique_event_times = unique_event_times, types = types,
+                              extend_data = extend_data)
     vtg::log$info("Results from `perform_iteration` {i} received.")
 
     errors <- vtg::collect_errors(aggregates)
@@ -151,7 +155,7 @@ dcoxph <- function(client, expl_vars, time_col, censor_col, types = NULL,
       break
     }
 
-    if (delta <= 10^-8) {
+    if (delta <= 10^-30) {
       vtg::log$info("Betas have settled! Finished iterating!")
       break
     }

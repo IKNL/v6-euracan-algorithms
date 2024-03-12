@@ -8,13 +8,15 @@ library(dplyr);library(survival);
 # Data <- read.table("https://stats.idre.ucla.edu/stat/r/examples/asa/hmohiv.csv"
                    # , sep=",", header = TRUE)
 
-data1 = read.csv("C://data//euracan-node-a.csv")
-data2 = read.csv("C://data//euracan-node-b.csv")
+data1 = read.csv("//mnt//c//data//euracan-node-a.csv")
+data2 = read.csv("//mnt//c//data//euracan-node-b.csv")
 datasets = list(data1, data2)
 Data = rbind(data1, data2)
 
 data_local <- rbind(vtg.preprocessing::extend_data(data1),
                     vtg.preprocessing::extend_data(data2))
+
+df <- data_local
 df <- na.omit(df[, c("BMI", "b02_edu", "deadOS", "surv")])
 
 regfit <-  coxph(Surv(surv, deadOS) ~ BMI + b02_edu, data=data_local,
