@@ -12,9 +12,11 @@
 #'
 #' @export
 #'
-RPC_get_vars <- function(data, subset_rules, master) {
+RPC_get_vars <- function(data, subset_rules, master, extent_data = TRUE) {
   # Data pre-processing specific to EURACAN
-  data <- vtg.preprocessing::extend_data(data)
+  if (extent_data) {
+    data <- vtg.preprocessing::extend_data(data)
+  }
   data <- tryCatch(
     vtg.preprocessing::subset_data(data, subset_rules),
     error = function(e) {

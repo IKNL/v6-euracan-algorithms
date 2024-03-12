@@ -12,6 +12,11 @@ data2$b04_sex[1] <- 999
 
 dataset <- list(data1, data2)
 
+# Build-in R dataset
+data("esoph")
+xtabs(formula = ~agegp+alcgp, data = esoph)
+
+
 # Data = rbind(data1, data2)
 
 data_local <- rbind(vtg.preprocessing::extend_data(data1),
@@ -19,7 +24,7 @@ data_local <- rbind(vtg.preprocessing::extend_data(data1),
 
 # dataset = rbind(data1, data2)
 
-formula = as.formula(~ e34_cstage + b04_sex)
+formula = as.formula(~ e34_cstage + b04_sex + event_pfs + age)
 
 crosstab.mock <- function(dataset,formula){
     client=vtg::MockClient$new(datasets = dataset,pkgname = 'vtg.crosstab')
@@ -30,4 +35,4 @@ crosstab.mock <- function(dataset,formula){
 
 res <- crosstab.mock(dataset = dataset, formula = formula)
 # compare to... works!
-xtabs(formula,data)
+xtabs(formula, data_local)

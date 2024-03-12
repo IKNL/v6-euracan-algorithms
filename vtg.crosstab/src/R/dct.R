@@ -11,7 +11,9 @@
 #' @export
 
 dct <- function(client, f, margin = NULL, percentage = F,
-                organizations_to_include = NULL, subset_rules = NULL) {
+                organizations_to_include = NULL, subset_rules = NULL,
+                extent_data = TRUE) {
+
   lgr::threshold("debug")
 
   vtg::log$info("Initializing crosstab...")
@@ -30,7 +32,8 @@ dct <- function(client, f, margin = NULL, percentage = F,
       margin = margin,
       percentage = percentage,
       organizations_to_include = organizations_to_include,
-      subset_rules = subset_rules
+      subset_rules = subset_rules,
+      extent_data = extent_data
     )
     return(result)
   }
@@ -51,7 +54,8 @@ dct <- function(client, f, margin = NULL, percentage = F,
   #######################################################################
   # RPC GET VARS - GET UNIQUE VARIABLES AT EACH NODE
   #######################################################################
-  nodes <- client$call("get_vars", subset_rules = subset_rules, master = ct)
+  nodes <- client$call("get_vars", subset_rules = subset_rules, master = ct,
+                       extent_data = extent_data)
 
   vtg::log$info("")
   vtg::log$info("###############################################")
@@ -72,7 +76,8 @@ dct <- function(client, f, margin = NULL, percentage = F,
   #######################################################################
   # RPC CT - BUILD LOCAL CONTINGENCY TABLE
   #######################################################################
-  nodes <- client$call("CT", subset_rules = subset_rules, master = ct)
+  nodes <- client$call("CT", subset_rules = subset_rules, master = ct,
+                       extent_data = extent_data)
 
   vtg::log$info("")
   vtg::log$info("###############################################")
@@ -86,7 +91,8 @@ dct <- function(client, f, margin = NULL, percentage = F,
 
   if (!is.null(margin) && (is.integer(margin)) && (1 <= margin) &&
         (3 >= margin)) {
-    ct <- vtg.crosstab::proportion(ct, margin)
+
+    ct <- vtg.crosstab::proportion(ct, margin) # prop.table(output, margin)
   }
 
   if (!isFALSE(percentage)) {
