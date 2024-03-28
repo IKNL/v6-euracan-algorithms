@@ -60,6 +60,6 @@ subset_data <- function(data, subset_rules) {
 }
 
 get_threshold <- function() {
-  threshold <- Sys.getenv("VTG_PREPROCESS_MIN_RECORDS_THRESHOLD", unset = 5)
+  threshold <- Sys.getenv("VTG_PREPROCESS_MIN_RECORDS_THRESHOLD", unset = 3)
   return(as.integer(threshold))
 }
