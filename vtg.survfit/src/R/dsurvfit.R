@@ -24,7 +24,7 @@
 #'
 dsurvfit <- function(client, formula, conf.int = 0.95, conf.type = "log", tmax = NA,
                      timepoints = NULL, plotCI = FALSE, organizations_to_include = NULL,
-                     subset_rules = NULL, extend_data = FALSE) {
+                     subset_rules = NULL, extend_data = TRUE) {
 
   vtg::log$set_threshold("debug")
 
