@@ -50,6 +50,9 @@ coxph:
 crosstab:
 	make docker PKG_NAME=vtg.crosstab
 
+glm:
+	make docker PKG_NAME=vtg.glm
+
 build: install-deps document
 	@echo "*** Building \"$(PKG_NAME)\" ***"
 	@mkdir ../dist; cd ../dist; R CMD build ../src
