@@ -1,4 +1,5 @@
 serv_KM=function(nodes=NULL,master=NULL){
+
     s = Reduce(`+`, lapply(nodes, function(j) j$s))
     r = Reduce(`+`,lapply(nodes, function(j) j$r))
 

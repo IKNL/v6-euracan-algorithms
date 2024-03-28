@@ -1,7 +1,9 @@
-RPC_time=function(data,subset_rules,master,vars, stratum=NULL){
+RPC_time=function(data,subset_rules,master,vars, stratum=NULL, extend_data=TRUE){
 
     # Data pre-processing specific to EURACAN
-    data <- vtg.preprocessing::extend_data(data)
+    if (extend_data) {
+        data <- vtg.preprocessing::extend_data(data)
+    }
     data <- vtg.preprocessing::subset_data(data, subset_rules)
 
     # Select only the records that have non-missing values for the vars
@@ -13,7 +15,9 @@ RPC_time=function(data,subset_rules,master,vars, stratum=NULL){
     event=master$event
     strata=master$strata
     tmax=master$tmax
-    if(!is.na(time2)) data[,time]=data[,time2]-data[,time]
+    if(!is.na(time2)) {
+      data[,time] <- data[, time2] - data[, time]
+    }
     if(!is.na(tmax)){
         data[data[,time]>tmax ,event]=0
         data[data[,time]>tmax ,time]=tmax

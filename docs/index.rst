@@ -25,7 +25,7 @@ and is intended for the use of EURACAN algorithms that can be executed in the
 
 .. toctree::
     :caption: Algorithms
-    :maxdepth: 2
+    :maxdepth: 3
 
     summary/index
     chisq/index

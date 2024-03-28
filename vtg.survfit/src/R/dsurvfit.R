@@ -24,7 +24,7 @@
 #'
 dsurvfit <- function(client, formula, conf.int = 0.95, conf.type = "log", tmax = NA,
                      timepoints = NULL, plotCI = FALSE, organizations_to_include = NULL,
-                     subset_rules = NULL) {
+                     subset_rules = NULL, extend_data = FALSE) {
 
   vtg::log$set_threshold("debug")
 
@@ -48,7 +48,7 @@ dsurvfit <- function(client, formula, conf.int = 0.95, conf.type = "log", tmax =
                           conf.type = conf.type, timepoints = timepoints,
                           plotCI = plotCI,
                           organizations_to_include = organizations_to_include,
-                          subset_rules = subset_rules)
+                          subset_rules = subset_rules, extend_data = extend_data)
     return(result)
   }
 
@@ -90,7 +90,8 @@ dsurvfit <- function(client, formula, conf.int = 0.95, conf.type = "log", tmax =
       subset_rules = subset_rules,
       master = master,
       vars = vars,
-      stratum = stratum
+      stratum = stratum,
+      extend_data = extend_data
     )
 
     if (is.null(timepoints)) {
@@ -105,7 +106,8 @@ dsurvfit <- function(client, formula, conf.int = 0.95, conf.type = "log", tmax =
       subset_rules = subset_rules,
       master = master,
       vars = vars,
-      stratum = stratum
+      stratum = stratum,
+      extend_data = extend_data
     )
     master <- serv_at_risk(nodes = node_at_risk, master = master)
 
@@ -115,7 +117,8 @@ dsurvfit <- function(client, formula, conf.int = 0.95, conf.type = "log", tmax =
       subset_rules = subset_rules,
       master = master,
       vars = vars,
-      stratum = stratum
+      stratum = stratum,
+      extend_data = extend_data
     )
     master <- vtg.survfit::serv_KM(nodes = node_KMsurv, master = master)
     return(master)
@@ -132,7 +135,8 @@ dsurvfit <- function(client, formula, conf.int = 0.95, conf.type = "log", tmax =
       "strata",
       subset_rules = subset_rules,
       strata = vars[3],
-      vars = vars
+      vars = vars,
+      extend_data = extend_data
     )
     stratum <- unique(unlist(node_strata))
     print(stratum)
@@ -153,13 +157,18 @@ dsurvfit <- function(client, formula, conf.int = 0.95, conf.type = "log", tmax =
     )
     return(tab)
   })
+
   Tab <- as.table(t(Tab))
   row.names(Tab) <- names(master)
   colnames(Tab) <- c("n", "events", "median", "0.95LCL", "0.95UCL")
+  Tab <- as.matrix(Tab)
+  Tab[is.na(Tab)] <- "NA"
+  Tab <- as.table(Tab)
   master$Tab <- Tab
   print(master$Tab)
   # plot <- jpeg(filename = "plotKM_plot%03d.jpg", width = 960, height = 960,
   #              quality = 100)
+  print("all good, plotting")
   jpeg(plot <- tempfile(fileext = ".jpg"),
     width = 960, height = 960,
     quality = 100
@@ -174,6 +183,7 @@ dsurvfit <- function(client, formula, conf.int = 0.95, conf.type = "log", tmax =
     plot, "raw",
     file.info(plot)[1, "size"]
   ), "txt")
+  print("we made it!")
   master$imgtxt <- txt
   return(list(
     Tab = master$Tab,

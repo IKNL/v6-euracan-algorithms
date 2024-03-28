@@ -1,7 +1,9 @@
-RPC_strata <- function(data, subset_rules, strata, vars) {
+RPC_strata <- function(data, subset_rules, strata, vars, extend_data=TRUE) {
 
   # Data pre-processing specific to EURACAN
-  data <- vtg.preprocessing::extend_data(data)
+  if (extend_data) {
+    data <- vtg.preprocessing::extend_data(data)
+  }
   data <- vtg.preprocessing::subset_data(data, subset_rules)
 
   # Select only the records that have non-missing values for the vars

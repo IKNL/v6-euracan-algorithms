@@ -1,7 +1,9 @@
-RPC_KMsurv=function(data,subset_rules,master,vars,stratum=NULL){
+RPC_KMsurv=function(data,subset_rules,master,vars,stratum=NULL, extend_data=TRUE){
 
     # Data pre-processing specific to EURACAN
-    data <- vtg.preprocessing::extend_data(data)
+    if (extend_data) {
+        data <- vtg.preprocessing::extend_data(data)
+    }
     data <- vtg.preprocessing::subset_data(data, subset_rules)
 
     # Select only the records that have non-missing values for the vars
@@ -26,7 +28,9 @@ RPC_KMsurv=function(data,subset_rules,master,vars,stratum=NULL){
     data=data[order(data[,time]),]
     ev_cen=event_and_censor(data=data,master=master)
     n.event=ev_cen$n.event
+
     n.censor=ev_cen$n.censor
+
     s=(n.event/n.at.risk)
     r=n.event/(n.at.risk*(n.at.risk-n.event))
     return(list(s=s,r=r))
