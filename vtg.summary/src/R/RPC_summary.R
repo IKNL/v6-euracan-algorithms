@@ -51,11 +51,11 @@ RPC_summary <- function(data, columns, types = NULL, subset_rules = NULL,
   column_lengths <- colSums(!is.na(data))
 
   # check if there are disclosure risks in column lengths. If so, return error
-  threshold <- get_threshold()
-  vtg::log$debug("Checking diclosure risk in column lengths...")
-  if (any(column_lengths < threshold)) {
-    return(disclosive_msg_col_length(columns, column_lengths, threshold))
-  }
+  # threshold <- get_threshold()
+  # vtg::log$debug("Checking diclosure risk in column lengths...")
+  # if (any(column_lengths < threshold)) {
+  #   return(disclosive_msg_col_length(columns, column_lengths, threshold))
+  # }
 
   # compute sum
   vtg::log$debug("Computing column sums...")
@@ -71,22 +71,22 @@ RPC_summary <- function(data, columns, types = NULL, subset_rules = NULL,
   # return error
   vtg::log$debug("Checking disclosure risk in column ranges...")
   factor_columns <- columns[sapply(data[, columns], is.factor)]
-  if (any(
-    sapply(column_ranges[factor_columns], function(x) any(x < threshold))
-  )) {
-    return(disclosive_msg_factorial(column_ranges, factor_columns, threshold))
-  }
+  # if (any(
+  #   sapply(column_ranges[factor_columns], function(x) any(x < threshold))
+  # )) {
+  #   return(disclosive_msg_factorial(column_ranges, factor_columns, threshold))
+  # }
 
   # compute number of rows with values in all columns
   vtg::log$debug("Counting number of rows with values in all columns...")
   complete_rows <- nrow(na.omit(data))
-  if (complete_rows < threshold) {
-    msg <- glue::glue(
-      "Disclosure risk, not enough rows without NAs"
-    )
-    vtg::log$error(msg)
-    return(list("error" = msg))
-  }
+  # if (complete_rows < threshold) {
+  #   msg <- glue::glue(
+  #     "Disclosure risk, not enough rows without NAs"
+  #   )
+  #   vtg::log$error(msg)
+  #   return(list("error" = msg))
+  # }
 
   vtg::log$debug("Returning results...")
   return(
@@ -181,7 +181,7 @@ disclosive_msg_factorial <- function(col_ranges, factorial_cols, threshold) {
 }
 
 get_threshold <- function() {
-  return(get_env_var("VTG_SUMMARY_THRESHOLD", 5L))
+  return(get_env_var("VTG_SUMMARY_THRESHOLD", 3L))
 }
 
 get_env_var <- function(var, default) {
