@@ -21,16 +21,25 @@
 #' @TODO check if works with single column
 RPC_summary <- function(data, columns, types = NULL, subset_rules = NULL,
                         is_extend_data = TRUE) {
-
-  vtg::log$set_threshold("debug")
-  # TODO if preprocessing active, logs of RPC functions are not printed. Why?
-  # Data pre-processing specific to EURACAN
-  if (is_extend_data) {
-    data <- vtg.preprocessing::extend_data(data)
+  data <- tryCatch(
+    {
+      if (is_extend_data) {
+        data <- vtg.preprocessing::extend_data(data)
+      }
+      data <- vtg.preprocessing::subset_data(data, subset_rules)
+      data
+    },
+    error = function(e) {
+      vtg::error_format(conditionMessage(e))
+    }
+  )
+  if (!is.null(data$error)) {
+    vtg::log$error(data$error)
+    return(data)
   }
-  data <- vtg.preprocessing::subset_data(data, subset_rules)
+  vtg::log$set_threshold("debug")
 
-  vtg::log$debug("Factorizing character data...")
+  vtg::log$debug("Factorizing character data....")
   data <- vtg.preprocessing::factorize(data)
 
   # execute checks that are common to all RPCs
@@ -124,7 +133,7 @@ get_column_ranges <- function(data, columns) {
   summary_numeric <- NULL
   if (length(numeric_columns) > 0) {
     if (length(numeric_columns) == 1) {
-      summary_numeric <- cbind(numeric_columns=summary(data[, numeric_columns]))
+      summary_numeric <- cbind(numeric_columns = summary(data[, numeric_columns]))
       colnames(summary_numeric) <- numeric_columns
     } else {
       summary_numeric <- do.call(cbind, lapply(data[, numeric_columns], summary))
@@ -141,8 +150,10 @@ get_column_ranges <- function(data, columns) {
   # get range per column from summary
   col_ranges <- summary_factors
   for (col in numeric_columns) {
-    col_ranges[[col]] <- c(summary_numeric["Min.", col],
-                           summary_numeric["Max.", col])
+    col_ranges[[col]] <- c(
+      summary_numeric["Min.", col],
+      summary_numeric["Max.", col]
+    )
   }
   return(col_ranges)
 }
@@ -185,13 +196,13 @@ get_threshold <- function() {
 }
 
 get_env_var <- function(var, default) {
-
   value <- as.integer(Sys.getenv(var))
 
   if (is.na(value)) {
-    vtg::log$warn("'", var, "' is not set, using default of ",
-                  default, ".")
+    vtg::log$warn(
+      "'", var, "' is not set, using default of ",
+      default, "."
+    )
     return(default)
   }
-
 }

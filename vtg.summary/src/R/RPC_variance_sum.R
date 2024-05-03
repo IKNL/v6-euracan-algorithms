@@ -19,12 +19,23 @@
 #'
 RPC_variance_sum <- function(data, columns, mean, types = NULL,
                              subset_rules = NULL, is_extend_data = TRUE) {
-
-  # Data pre-processing specific to EURACAN
-  if (is_extend_data) {
-    data <- vtg.preprocessing::extend_data(data)
+  data <- tryCatch(
+    {
+      if (is_extend_data) {
+        data <- vtg.preprocessing::extend_data(data)
+      }
+      data <- vtg.preprocessing::subset_data(data, subset_rules)
+      data
+    },
+    error = function(e) {
+      vtg::error_format(conditionMessage(e))
+    }
+  )
+  if (!is.null(data$error)) {
+    vtg::log$error(data$error)
+    return(data)
   }
-  data <- vtg.preprocessing::subset_data(data, subset_rules)
+
   vtg::log$debug("Factorizing character data...")
   data <- vtg.preprocessing::factorize(data)
 
@@ -42,7 +53,8 @@ RPC_variance_sum <- function(data, columns, mean, types = NULL,
       result[[column]] <- NA
     } else {
       result[[column]] <- sum((data[, column] - mean[[column]])^2,
-                              na.rm = TRUE)
+        na.rm = TRUE
+      )
     }
   }
   return(result)
