@@ -14,17 +14,19 @@
 RPC_perform_iteration <- function(df, subset_rules, expl_vars, time_col,
                                   censor_col, beta, unique_event_times,
                                   types = NULL, extend_data = TRUE) {
-  # Data pre-processing specific to EURACAN
-  if (extend_data){
-    df <- vtg.preprocessing::extend_data(df)
-  }
+  # Data pre-processing and filtering specific to EURACAN
   df <- tryCatch(
-    vtg.preprocessing::subset_data(df, subset_rules),
+    {
+      if (extend_data) {
+        df <- vtg.preprocessing::extend_data(df)
+      }
+      df <- vtg.preprocessing::subset_data(df, subset_rules)
+      df
+    },
     error = function(e) {
-      return(vtg::error_format(conditionMessage(e)))
+      vtg::error_format(conditionMessage(e))
     }
   )
-
   if (!is.null(df$error)) {
     vtg::log$error(df$error)
     return(df)

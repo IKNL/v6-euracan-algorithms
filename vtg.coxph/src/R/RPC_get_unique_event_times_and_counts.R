@@ -9,17 +9,19 @@
 RPC_get_unique_event_times_and_counts <- function(df, expl_vars, subset_rules, time_col,
                                                   censor_col, types = NULL,
                                                   extend_data = TRUE) {
-  # Data pre-processing specific to EURACAN
-  if (extend_data){
-    df <- vtg.preprocessing::extend_data(df)
-  }
+  # Data pre-processing and filtering specific to EURACAN
   df <- tryCatch(
-    vtg.preprocessing::subset_data(df, subset_rules),
+    {
+      if (extend_data) {
+        df <- vtg.preprocessing::extend_data(df)
+      }
+      df <- vtg.preprocessing::subset_data(df, subset_rules)
+      df
+    },
     error = function(e) {
-      return(vtg::error_format(conditionMessage(e)))
+      vtg::error_format(conditionMessage(e))
     }
   )
-
   if (!is.null(df$error)) {
     vtg::log$error(df$error)
     return(df)
@@ -36,7 +38,7 @@ RPC_get_unique_event_times_and_counts <- function(df, expl_vars, subset_rules, t
   time <- df[df[, censor_col] == 1, time_col]
   print(time)
   print(length(time) == 0)
-  if (length(time) < 2){
+  if (length(time) < 2) {
     vtg::log$warn("< 2 events found in the data!")
     return(data.frame(time = numeric(), Freq = numeric()))
   }
