@@ -14,14 +14,15 @@ LABEL maintainer="Bart van Beusekom <b.vanbeusekom@iknl.nl>"
 # Install common functions package
 COPY ./vtg.preprocessing/ /usr/local/R/vtg.preprocessing/
 RUN Rscript -e 'install.packages("/usr/local/R/vtg.preprocessing", \
-                                 repos = NULL, type = "source")'
+  repos = NULL, type = "source")'
 
 # Install federated summary package
 COPY ./${PKG_NAME}/src /usr/local/R/${PKG_NAME}/
 
 WORKDIR /usr/local/R/${PKG_NAME}
-RUN Rscript -e 'library(devtools)' -e 'install_deps(".")'
-RUN R CMD INSTALL --no-multiarch --with-keep.source .
+RUN Rscript -e 'library(devtools)' -e 'install_github("IKNL/vtg")'
+RUN Rscript -e 'devtools::install_deps(".")'
+RUN Rscript -e 'install.packages(".", repos = NULL, type = "source", INSTALL_opts = "--no-multiarch")'
 
 # Change directory to '/app’ and create files that will be
 # used to mount input, output and database.
