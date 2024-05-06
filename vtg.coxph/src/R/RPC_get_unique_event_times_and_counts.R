@@ -10,6 +10,8 @@ RPC_get_unique_event_times_and_counts <- function(df, expl_vars, subset_rules, t
                                                   censor_col, types = NULL,
                                                   extend_data = TRUE) {
   # Data pre-processing and filtering specific to EURACAN
+  vtg::log$info("Computing unique event times and counts")
+  vtg::log$info("Preprocessing data...")
   df <- tryCatch(
     {
       if (extend_data) {
@@ -33,11 +35,19 @@ RPC_get_unique_event_times_and_counts <- function(df, expl_vars, subset_rules, t
   vtg::log$info("Rows after NA removal: {nrow(df)}")
 
   # Specify data types for the columns in the data
+  vtg::log$info("Assigning types to columns")
   if (!is.null(types)) df <- assign_types(df, types)
 
+  vtg::log$info("One-hot encoding factor columns in expl vars...")
+  for (column_name in expl_vars) {
+    if (is.factor(df[[column_name]])) {
+      res <- one_hot_encoding(df, column_name)
+      expl_vars <- c(expl_vars, res$columns_names)
+      expl_vars <- expl_vars[expl_vars != column_name]
+      df <- res$data
+    }
+  }
   time <- df[df[, censor_col] == 1, time_col]
-  print(time)
-  print(length(time) == 0)
   if (length(time) < 2) {
     vtg::log$warn("< 2 events found in the data!")
     return(data.frame(time = numeric(), Freq = numeric()))
@@ -46,5 +56,6 @@ RPC_get_unique_event_times_and_counts <- function(df, expl_vars, subset_rules, t
 
   df_time <- as.data.frame(table(time), stringsAsFactors = F)
   df_time <- apply(df_time, 2, as.numeric)
+  vtg::log$info("Unique event times and counts computed")
   return(df_time)
 }

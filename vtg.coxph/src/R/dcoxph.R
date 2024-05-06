@@ -114,7 +114,7 @@ dcoxph <- function(client, expl_vars, time_col, censor_col, types = NULL,
 
   # Initialize the betas to 0 and start iterating
   vtg::log$info("Starting iterations ...")
-  beta <- beta_old <- rep(0, m)
+  beta <- NULL
   delta <- 0
 
   i <- 1
@@ -151,6 +151,9 @@ dcoxph <- function(client, expl_vars, time_col, censor_col, types = NULL,
 
     # Update the betas
     vtg::log$info("Updating betas ...")
+    if (is.null(beta)) {
+      beta <- rep(0, aggregates[[1]]$m)
+    }
     beta_old <- beta
     beta <- beta_old - (solve(derivatives$secondary) %*%
       derivatives$primary)

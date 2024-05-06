@@ -15,6 +15,8 @@ RPC_perform_iteration <- function(df, subset_rules, expl_vars, time_col,
                                   censor_col, beta, unique_event_times,
                                   types = NULL, extend_data = TRUE) {
   # Data pre-processing and filtering specific to EURACAN
+  vtg::log$info("Computing aggregated statistics")
+  vtg::log$info("Preprocessing data...")
   df <- tryCatch(
     {
       if (extend_data) {
@@ -37,12 +39,29 @@ RPC_perform_iteration <- function(df, subset_rules, expl_vars, time_col,
   # TODO: we need to check if sufficient columns are left after NA removal
   vtg::log$info("Rows after NA removal: {nrow(df)}")
 
+  vtg::log$info("Assigning types to columns")
   if (!is.null(types)) df <- assign_types(df, types)
 
+  vtg::log$info("One-hot encoding factor columns in expl vars...")
+  for (column_name in expl_vars) {
+    if (is.factor(df[[column_name]])) {
+      res <- one_hot_encoding(df, column_name)
+      expl_vars <- c(expl_vars, res$columns_names)
+      expl_vars <- expl_vars[expl_vars != column_name]
+      df <- res$data
+    }
+  }
+
+  df_expl_vars <- df[, expl_vars]
+
+  vtg::log$info("Preprocess...")
   data <- preprocess.data(df, expl_vars, censor_col, time_col)
 
   D <- length(unique_event_times)
   m <- length(expl_vars)
+  if (is.null(beta)) {
+    beta <- rep(0, m)
+  }
 
   # initialize matrices for the aggregates we're about to compute
   agg1 <- array(dim = c(D), 0)
@@ -52,6 +71,7 @@ RPC_perform_iteration <- function(df, subset_rules, expl_vars, time_col,
   agg3 <- array(dim = c(D, m, m), 0)
   dimnames(agg3) <- list(NULL, expl_vars, expl_vars)
 
+  vtg::log$info("Computing aggregates...")
   for (i in 1:D) {
     cat(".")
     # Compute the risk set at time t; this includes *all* patients that have a
@@ -94,11 +114,16 @@ RPC_perform_iteration <- function(df, subset_rules, expl_vars, time_col,
 
   writeln("")
 
+  print(agg1)
+  print(agg2)
+  print(agg3)
+
   return(
     list(
       agg1 = agg1,
       agg2 = agg2,
-      agg3 = agg3
+      agg3 = agg3,
+      m = m
     )
   )
 }

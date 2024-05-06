@@ -14,6 +14,8 @@
 RPC_compute_summed_z <- function(df, subset_rules, expl_vars, time_col,
                                  censor_col, types = NULL, extend_data = TRUE) {
   # Data pre-processing and filtering specific to EURACAN
+  vtg::log$info("Computing summed Zs")
+  vtg::log$info("Preprocessing data...")
   df <- tryCatch(
     {
       if (extend_data) {
@@ -38,6 +40,15 @@ RPC_compute_summed_z <- function(df, subset_rules, expl_vars, time_col,
 
   # Specify data types for the columns in the data
   if (!is.null(types)) df <- assign_types(df, types)
+
+  for (column_name in expl_vars) {
+    if (is.factor(df[[column_name]])) {
+      res <- one_hot_encoding(df, column_name)
+      expl_vars <- c(expl_vars, res$columns_names)
+      expl_vars <- expl_vars[expl_vars != column_name]
+      df <- res$data
+    }
+  }
 
   data <- preprocess.data(df, expl_vars, censor_col, time_col)
 
