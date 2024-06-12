@@ -38,6 +38,9 @@ echo:
 chisq:
 	make docker PKG_NAME=vtg.chisq
 
+survdiff:
+	make docker PKG_NAME=vtg.survdiff
+
 survfit:
 	make docker PKG_NAME=vtg.survfit
 
@@ -52,6 +55,9 @@ crosstab:
 
 glm:
 	make docker PKG_NAME=vtg.glm
+
+debugger:
+	make docker PKG_NAME=vtg.debugger
 
 build: install-deps document
 	@echo "*** Building \"$(PKG_NAME)\" ***"
@@ -94,12 +100,12 @@ docker-build:
 	@if test "$(TAG)" = "dev"; then \
 		echo "Building development image";\
 		docker build \
-			-f ./docker/${PKG_NAME}.Dockerfile --build-arg PKG_NAME=${PKG_NAME} \
+			-f ./docker/${PKG_NAME}.Dockerfile --no-cache --build-arg PKG_NAME=${PKG_NAME} \
 			--build-arg TAG=${TAG} -t ${HOST}/${IMAGE}:${TAG} . ;\
 	else \
 		echo "Building production image";\
 		docker build \
-			-f ./docker/${PKG_NAME}.Dockerfile --build-arg PKG_NAME=${PKG_NAME} \
+			-f ./docker/${PKG_NAME}.Dockerfile --no-cache --build-arg PKG_NAME=${PKG_NAME} \
 			--build-arg TAG=${TAG} -t ${IMAGE}:${TAG} -t ${HOST}/${IMAGE}:${TAG} \
 			-t ${HOST}/${IMAGE}:${TAG} -t ${HOST}/${IMAGE}:latest . ;\
 	fi
