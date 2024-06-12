@@ -19,58 +19,12 @@ dsurvdiff <- function(client, formula, timepoints = NULL, tmax = NA,
   vtg::log$debug("Initializing...")
   lgr::threshold("debug")
 
-  image.name <- "harbor2.vantage6.ai/starter/survdiff"
-
-  client$set.task.image(
-    image.name,
-    task.name = "survdiff"
-  )
-
-  # Update the client organizations according to those specified
-  if (!is.null(organizations_to_include)) {
-    vtg::log$info("Sending tasks only to specified organizations")
-    organizations_in_collaboration <- client$collaboration$organizations
-    # Clear the current list of organizations in the collaboration
-    # Will remove them for current task, not from actual collaboration
-    client$collaboration$organizations <- list()
-    # Reshape list when the organizations_to_include is not already a list
-    # Relevant when e.g., Python is used as client
-    if (!is.list(organizations_to_include)) {
-      organizations_to_use <- toString(organizations_to_include)
-
-      # Remove leading and trailing spaces as in python list
-      organizations_to_use <-
-        gsub(" ", "", organizations_to_use, fixed = TRUE)
-
-      # Convert to list assuming it is comma separated
-      organizations_to_use <-
-        as.list(strsplit(organizations_to_use, ",")[[1]])
-    }
-    # Loop through the organization ids in the collaboration
-    for (organization in organizations_in_collaboration) {
-      # Include the organizations only when desired
-      if (organization$id %in% organizations_to_use) {
-        client$collaboration$organizations[[length(
-          client$collaboration$organizations
-        ) + 1]] <- organization
-      }
-    }
-  }
-
-  # Parse a string to formula type. If it already is a formula this statement
-  # will do nothing. This is needed when Python (or other langauges) is used
-  # as a client.
-
-  f <- as.formula(formula)
-
-  # Run in a MASTER container. Note that this will call this method but then
-  # within a Docker container. The client used here below has set the
-  # property `use.master.container` set to `False`, therefore it will skip
-  # this block (else an infinite loop would occur).
-
+  #
+  # Central part guard
+  # this will call itself without the `use.master.container` option
+  #
   if (client$use.master.container) {
-    vtg::log$debug(glue::glue("Running `dsurvdiff` in master container using
-                                  image '{image.name}'.."))
+    vtg::log$debug(glue::glue("Running `dsurvdiff` in central container"))
     result <- client$call(
       "dsurvdiff",
       formula = f,
@@ -81,6 +35,18 @@ dsurvdiff <- function(client, formula, timepoints = NULL, tmax = NA,
 
     return(result)
   }
+
+  # Parse a string to formula type. If it already is a formula this statement
+  # will do nothing. This is needed when Python (or other langauges) is used
+  # as a client.
+  f <- as.formula(formula)
+
+  # We set the organizations to include for the partial tasks, we do this after
+  # the central part guard, so that it is clear this is about the partial tasks
+  # as the central part should only be executed in one node (this is because
+  # of the `use.master.container` option)
+  client$setOrganizations(organizations_to_include)
+
   # initialization variables
   vars <- all.vars(f)
   LRT <- function(vars, stratum = NULL) {
