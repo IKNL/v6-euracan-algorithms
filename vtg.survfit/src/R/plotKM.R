@@ -5,15 +5,27 @@ plotKM <- function(master, plotCI=F){
     plot(x=tt, y=rep(1,length(tt)), type='n', ylim=c(0,1),
          ylab='Survival probability', xlab='Time', main="Kaplan-Meier",
          cex.lab=1, cex.main=2, las=1)
+
     for(i in 1:length(temp.master)){
-        lines(temp.master[[i]]$times, temp.master[[i]]$surv, type='s', col=i,
-              lwd=2)
-        if(plotCI){
-            lines(temp.master[[i]]$times, temp.master[[i]]$upper, type='s',
-                  col=i, lty=2, lwd=2)
-            lines(temp.master[[i]]$times, temp.master[[i]]$lower, type='s',
-                  col=i, lty=2, lwd=2)
-        }
+
+        print("********************")
+        print(temp.master[[i]]$times)
+        print(temp.master[[i]]$surv)
+
+        # Remove NAs from times and surv
+        valid_indices <- !is.na(temp.master[[i]]$times) & !is.na(temp.master[[i]]$surv)
+
+        # Plot the lines without NAs
+        lines(temp.master[[i]]$times[valid_indices], temp.master[[i]]$surv[valid_indices], type='s', col=i, lwd=2)
+        # lines(temp.master[[i]]$times, temp.master[[i]]$surv, type='s', col=i,
+              # lwd=2)
+        # if(plotCI){
+        #     lines(temp.master[[i]]$times, temp.master[[i]]$upper, type='s',
+        #           col=i, lty=2, lwd=2)
+        #     lines(temp.master[[i]]$times, temp.master[[i]]$lower, type='s',
+        #           col=i, lty=2, lwd=2)
+        # }
+    # }
     }
     if(length(temp.master)>1){
         legend('topright', legend=names(temp.master), lty=1, lwd=2,
