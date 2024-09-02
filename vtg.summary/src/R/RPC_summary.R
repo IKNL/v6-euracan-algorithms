@@ -137,6 +137,7 @@ get_column_ranges <- function(data, columns) {
       colnames(summary_numeric) <- numeric_columns
     } else {
       summary_numeric <- do.call(cbind, lapply(data[, numeric_columns], summary))
+      colnames(summary_numeric) <- numeric_columns
     }
   }
 

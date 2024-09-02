@@ -20,6 +20,11 @@ RUN Rscript -e 'install.packages("/usr/local/R/vtg.preprocessing", \
 COPY ./${PKG_NAME}/src /usr/local/R/${PKG_NAME}/
 
 WORKDIR /usr/local/R/${PKG_NAME}
+# Install R and necessary packages
+# Somehow prettyunit crashes when installed using the `install_deps`
+RUN R -e "remove.packages('prettyunits')"
+RUN R -e "install.packages('prettyunits', repos='http://cran.rstudio.com/')"
+
 RUN Rscript -e 'library(devtools)' -e 'install_github("IKNL/vtg")'
 RUN Rscript -e 'devtools::install_deps(".")'
 RUN Rscript -e 'install.packages(".", repos = NULL, type = "source", INSTALL_opts = "--no-multiarch")'
