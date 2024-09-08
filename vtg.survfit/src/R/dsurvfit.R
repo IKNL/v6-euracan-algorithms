@@ -69,6 +69,8 @@ dsurvfit <- function(client, formula, conf.int = 0.95, conf.type = "log", tmax =
 
 
   KM <- function(vars, stratum = NULL) {
+    vtg::log$debug("  - [KM]")
+    vtg::log$debug("  - stratum: {stratum}")
     master <-
       if (length(vars) > 3) {
         list(
@@ -139,7 +141,9 @@ dsurvfit <- function(client, formula, conf.int = 0.95, conf.type = "log", tmax =
       extend_data = extend_data
     )
     stratum <- unique(unlist(node_strata))
-    print(stratum)
+    vtg::log$info("stratum:")
+    lapply(stratum, function (k) vtg::log$info(k))
+    vtg::log$info("stratum end")
     master <- lapply(stratum, function(k) KM(vars, k))
     names(master) <- paste0(vars[3], "=", stratum)
   }

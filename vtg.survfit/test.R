@@ -1,24 +1,17 @@
 # Clear the environment completely
 rm(list = ls(all.names = TRUE))
-devtools::load_all("./vtg.preprocessing/src")
+devtools::load_all("./vtg.preprocessing/R")
 devtools::load_all("./vtg.survfit/src")
-# This seems to be equivalent to "import x as y"
-library(namespace)
-tryCatch({
-    invisible(registerNamespace('vtg', loadNamespace('vtg')))
-}, error = function(e) {
-    vtg::writeln("Package 'vantage.infrastructure' already loaded.")
-})
 
 library(vtg.survfit)
 
-d1 <- read.csv("C:\\data\\euracan-node-a.csv")
+d1 <- read.csv("~/data/euracan-node-a.csv")
 dataset=list(d1, d1, d1)
 ###exapl
 
 # formula = Surv(time, status) ~ trt
 #formula = Surv(time,, status) ~ trt
-formula = 'Surv(surv, deadOS) ~ b04_sex'
+formula = 'Surv(surv, deadOS) ~ site'
 
 conf.int=0.95
 conf.type='log'
