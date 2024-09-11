@@ -175,10 +175,15 @@ combine_node_statistics <- function(summary_per_node, columns) {
 
   # TODO breaks when not all columns are present in all nodes
   for (column in names(ranges_per_node[[1]])) {
-    global_ranges[[column]] <-
-      Reduce("range", lapply(ranges_per_node, function(x) {
-        x[column]
-      }))
+    if (length(ranges_per_node) == 1) {
+      # Directly assign the ranges from the single element
+      global_ranges[[column]] <- ranges_per_node[[1]][[column]]
+    } else {
+      global_ranges[[column]] <-
+        Reduce("range", lapply(ranges_per_node, function(x) {
+          x[column]
+        }))
+    }
   }
   # global_ranges <- Reduce("range", ranges_per_node)
 
