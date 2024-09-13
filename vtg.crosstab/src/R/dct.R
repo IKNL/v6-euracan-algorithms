@@ -56,6 +56,10 @@ dct <- function(client, f, margin = NULL, percentage = F,
   #######################################################################
   nodes <- client$call("get_vars", subset_rules = subset_rules, master = ct,
                        extent_data = extent_data)
+  errors <- vtg::collect_errors(nodes)
+  if (!is.null(errors)) {
+    return(errors)
+  }
 
   vtg::log$info("")
   vtg::log$info("###############################################")
@@ -78,6 +82,10 @@ dct <- function(client, f, margin = NULL, percentage = F,
   #######################################################################
   nodes <- client$call("CT", subset_rules = subset_rules, master = ct,
                        extent_data = extent_data)
+  errors <- vtg::collect_errors(nodes)
+  if (!is.null(errors)) {
+    return(errors)
+  }
 
   vtg::log$info("")
   vtg::log$info("###############################################")

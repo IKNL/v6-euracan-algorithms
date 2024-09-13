@@ -1,3 +1,4 @@
+devtools::load_all("./vtg.preprocessing/R")
 devtools::load_all("./vtg.crosstab/src")
 library(pivottabler)
 

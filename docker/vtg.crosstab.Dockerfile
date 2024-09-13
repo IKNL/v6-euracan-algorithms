@@ -15,12 +15,22 @@ COPY ./vtg.preprocessing/ /usr/local/R/vtg.preprocessing/
 RUN Rscript -e 'install.packages("/usr/local/R/vtg.preprocessing", \
                                  repos = NULL, type = "source")'
 
-# Install federated chisq package
-COPY ./${PKG_NAME}/src /usr/local/R/${PKG_NAME}/
+RUN R -e "remove.packages('prettyunits')"
+RUN R -e "install.packages('prettyunits', repos='http://cran.rstudio.com/')"
+
+RUN Rscript -e 'library(devtools)' -e 'install_github("IKNL/vtg")'
+RUN Rscript -e 'install.packages("RCurl", repos = "http://cran.rstudio.com/")'
+
+COPY ./${PKG_NAME}/src/DESCRIPTION /usr/local/R/${PKG_NAME}/DESCRIPTION
 
 WORKDIR /usr/local/R/${PKG_NAME}
-RUN Rscript -e 'library(devtools)' -e 'install_deps(".")'
-RUN R CMD INSTALL --no-multiarch --with-keep.source .
+# Somehow prettyunit crashes when installed using the `install_deps`
+RUN Rscript -e 'devtools::install_deps(".", dependencies = TRUE)'
+
+# Install federated survfit package
+COPY ./${PKG_NAME}/src /usr/local/R/${PKG_NAME}/
+
+RUN Rscript -e 'install.packages(".", repos = NULL, type = "source", INSTALL_opts = "--no-multiarch")'
 
 # Change directory to '/app’ and create files that will be
 # used to mount input, output and database.

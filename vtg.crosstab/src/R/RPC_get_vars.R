@@ -24,15 +24,15 @@ RPC_get_vars <- function(data, subset_rules, master, extent_data = TRUE) {
     }
   )
 
-  if (!is.null(data$error)) {
+  if (!is.null(data$error)){
     vtg::log$error(data$error)
     return(data)
   }
 
   used_variables <- all.vars(master$formula)
   data <- data[, used_variables]
-  data[is.na(data)] <-"N/A"
+  data[is.na(data)] <- "N/A"
 
-  vars <- apply(data, 2, unique, simplify = FALSE)
+  vars <- lapply(data, function(column) unique(column))
   return(vars)
 }

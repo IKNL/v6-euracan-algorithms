@@ -33,11 +33,14 @@ RPC_CT <- function(data, subset_rules, master, extent_data = TRUE) {
   data <- data[, used_variables]
   data[is.na(data)] <- "N/A"
 
-  for (i in used_variables) {
-    data[, i] <- factor(data[, i], levels = master$var_cat[[i]])
-    vtg::log$debug(i)
-    vtg::log$debug(paste(master$var_cat[[i]], collapse = ", "))
+  for (var in used_variables) {
+    data[, var] <- factor(data[, var], levels = master$var_cat[[var]])
+    # print(var)
+    # print(paste(master$var_cat[[var]], collapse = ", "))
+    # print(levels(data[, var]))
   }
   ct <- xtabs(master$formula, data = data)
+  # print("Table:")
+  # print(ct)
   return(ct)
 }
